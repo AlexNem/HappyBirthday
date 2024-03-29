@@ -54,11 +54,16 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.alexnemyr.happybirthday.R
 import com.alexnemyr.happybirthday.TAG
+import org.koin.androidx.compose.koinViewModel
 import timber.log.Timber
 
 @Composable
 fun InputScreen() {
+
+    val mviViewModel = koinViewModel<InputViewModel>()
+
     val showSheet = remember { mutableStateOf(false) }
+
     var capturedImageUri by remember { mutableStateOf<Uri>(Uri.EMPTY) }
     val name = remember { mutableStateOf("") }
     val date = remember { mutableLongStateOf(0) }
