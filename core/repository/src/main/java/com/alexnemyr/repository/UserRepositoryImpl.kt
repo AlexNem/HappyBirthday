@@ -6,8 +6,6 @@ import com.alexnemyr.storage.AppPreferences
 class UserRepositoryImpl(
     private val preferences: AppPreferences
 ) : UserRepository {
-    override val test: String
-        get() = preferences.name ?: ""
     override val user: UserDomain
         get() = UserDomain(
             preferences.name,

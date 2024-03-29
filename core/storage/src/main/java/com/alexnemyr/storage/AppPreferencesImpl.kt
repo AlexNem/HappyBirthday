@@ -53,8 +53,4 @@ class AppPreferencesImpl(context: Context) : AppPreferences {
         private const val DATE_KEY = "USER_DATE"
         private const val URI_KEY = "USER_URI"
     }
-
-    override val test: String
-        get() = "AppPreferencesImpl"
-
 }
