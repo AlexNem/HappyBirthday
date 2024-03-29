@@ -21,4 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "HappyBirthday"
 include(":app")
- 
+include(":core:repository")
+include(":core:storage")

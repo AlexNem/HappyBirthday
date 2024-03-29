@@ -11,8 +11,8 @@ android {
         applicationId = "com.alexnemyr.happybirthday"
         minSdk = 24
         targetSdk = 34
-        versionCode = 2
-        versionName = "0.1"
+        versionCode = 3
+        versionName = "0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -74,4 +74,18 @@ dependencies {
 
     implementation(libs.timber)
     implementation(libs.coil.compose)
+    //MVI Kotlin
+    implementation(libs.mvikotlin)
+    implementation(libs.mvikotlin.main)
+    implementation(libs.mvikotlin.logging)
+    implementation(libs.mvikotlin.timetravel)
+    implementation(libs.mvikotlin.extensions.coroutines)
+    //DI
+    implementation(libs.koin.core)
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
+    implementation(libs.koin.annotations)
+    implementation(libs.koin.ksp.compiler)
+
+    implementation(project(":core:repository"))
 }
