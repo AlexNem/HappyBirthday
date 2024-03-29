@@ -2,6 +2,8 @@ package com.alexnemyr.happybirthday
 
 import android.app.Application
 import com.alexnemyr.happybirthday.di.viewModelModule
+import com.alexnemyr.repository.di.repositoryModule
+import com.alexnemyr.repository.di.storageModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import timber.log.Timber
@@ -26,7 +28,9 @@ class App : Application() {
             androidContext(this@App)
             modules(
                 listOf(
-                    viewModelModule
+                    viewModelModule,
+                    repositoryModule,
+                    storageModule
                 )
             )
         }

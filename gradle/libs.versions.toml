@@ -17,6 +17,9 @@ mvikotlinLogging = "3.3.0"
 mvikotlinMain = "3.3.0"
 mvikotlinTimetravel = "3.3.0"
 timberVersion = "5.0.1"
+jetbrainsKotlinJvm = "1.9.0"
+appcompat = "1.6.1"
+material = "1.11.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -45,8 +48,12 @@ mvikotlin-logging = { module = "com.arkivanov.mvikotlin:mvikotlin-logging", vers
 mvikotlin-main = { module = "com.arkivanov.mvikotlin:mvikotlin-main", version.ref = "mvikotlinMain" }
 mvikotlin-timetravel = { module = "com.arkivanov.mvikotlin:mvikotlin-timetravel", version.ref = "mvikotlinTimetravel" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timberVersion" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+jetbrainsKotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvm" }
+androidLibrary = { id = "com.android.library", version.ref = "agp" }
 
