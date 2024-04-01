@@ -1,4 +1,4 @@
-package com.alexnemyr.happybirthday.ui.flow.input
+package com.alexnemyr.happybirthday
 
 import android.net.Uri
 import android.os.Build
@@ -7,9 +7,9 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.alexnemyr.happybirthday.TAG
-import com.alexnemyr.happybirthday.ui.flow.anniversary.Age
-import com.alexnemyr.happybirthday.ui.flow.anniversary.age
+import com.alexnemyr.happybirthday.ui.common.Age
+import com.alexnemyr.happybirthday.ui.common.age
+import com.alexnemyr.happybirthday.ui.common.BirthdayState
 import com.alexnemyr.repository.UserRepository
 import com.alexnemyr.repository.domain.UserDomain
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,19 +19,19 @@ import timber.log.Timber
 import java.util.Calendar
 import java.util.Date
 
-class InputViewModel(
+class BirthdayViewModel(
     private val userRepository: UserRepository
 ) : ViewModel() {
 
-    val mutableState: MutableStateFlow<InputState> = MutableStateFlow(
+    val mutableState: MutableStateFlow<BirthdayState> = MutableStateFlow(
 
-        InputState(
+        BirthdayState(
             capturedImageUri = mutableStateOf(Uri.EMPTY), //Uri.parse(userRepository.user.uri)
             name = mutableStateOf(userRepository.user.name ?: ""),
             date = mutableLongStateOf(userRepository.user.date?.toLongOrNull() ?: 2)
         )
     )
-    val state: StateFlow<InputState> = mutableState
+    val state: StateFlow<BirthdayState> = mutableState
 
     val navigationState: MutableStateFlow<Boolean> = MutableStateFlow(true)
 

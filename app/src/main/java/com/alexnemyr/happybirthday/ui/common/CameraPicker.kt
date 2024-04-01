@@ -1,4 +1,4 @@
-package com.alexnemyr.happybirthday.ui.flow.input
+package com.alexnemyr.happybirthday.ui.common
 
 import android.Manifest
 import android.content.Context

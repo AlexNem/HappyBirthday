@@ -20,6 +20,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,17 +35,64 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.alexnemyr.happybirthday.R
-import com.alexnemyr.happybirthday.ui.flow.input.InputViewModel
+import com.alexnemyr.happybirthday.BirthdayViewModel
+import com.alexnemyr.happybirthday.ui.common.Age
+import com.alexnemyr.happybirthday.ui.common.AnniversaryRes
+import com.alexnemyr.happybirthday.ui.common.BGType
+import com.alexnemyr.happybirthday.ui.common.BirthdayState
+import com.alexnemyr.happybirthday.ui.common.CameraPicker
+import com.alexnemyr.happybirthday.ui.common.NumberIcon
+import com.alexnemyr.happybirthday.ui.common.Photo
+import com.alexnemyr.happybirthday.ui.common.PhotoPicker
+import com.alexnemyr.happybirthday.ui.common.PickerBottomSheet
+import com.alexnemyr.happybirthday.ui.common.age
+import com.alexnemyr.happybirthday.ui.common.getYearOrMonth
 
 @Composable
 fun AnniversaryScreen(
-    mviViewModel: InputViewModel
+    viewModel: BirthdayViewModel
 ) {
 
+    val showSheet = remember { mutableStateOf(false) }
 
-    val capturedImageUri = remember { mviViewModel.mutableState.value.capturedImageUri }
-    val name = remember { mviViewModel.mutableState.value.name }
-    val date = remember { mviViewModel.mutableState.value.date }
+    val capturedImageUri = remember { viewModel.mutableState.value.capturedImageUri }
+    val name = remember { viewModel.mutableState.value.name }
+    val date = remember { viewModel.mutableState.value.date }
+
+    if (showSheet.value) {
+        PickerBottomSheet(onDismiss = { showSheet.value = false }, content = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.padding(vertical = 32.dp)
+            ) {
+                PhotoPicker(onSelect = { uri ->
+                    capturedImageUri.value = uri
+                    showSheet.value = false
+                })
+                CameraPicker(onSelect = { uri ->
+                    capturedImageUri.value = uri
+                    showSheet.value = false
+                })
+            }
+        })
+    }
+
+
+    Anniversary(
+        showSheet,
+        BirthdayState(capturedImageUri, name, date),
+        viewModel,
+    )
+
+}
+
+@Composable
+fun Anniversary(
+    showSheet: MutableState<Boolean>,
+    state: BirthdayState,
+    viewModel: BirthdayViewModel,
+) {
 
     val bgList = listOf(BGType.FOX, BGType.PELICAN)
     val bg: AnniversaryRes = when (bgList.random()) {
@@ -76,7 +125,7 @@ fun AnniversaryScreen(
             modifier = Modifier
                 .padding(16.dp)
                 .align(Alignment.TopStart),
-            onClick = { mviViewModel.navTo(true) }) {
+            onClick = { viewModel.navTo(true) }) {
             Icon(painterResource(id = R.drawable.ic_navigate), contentDescription = null)
         }
 
@@ -98,18 +147,11 @@ fun AnniversaryScreen(
                         .background(bg.bntBGColor, CircleShape)
                         .size(300.dp)
                 )
-                Image(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(150.dp),
-                    painter = bg.bntIcon,
-                    contentDescription = null,
-                    contentScale = ContentScale.FillBounds
-                )
+                Photo(state, bg.bntIcon, Modifier.align(Alignment.Center))
 
                 val padding = 20.dp
                 IconButton(
-                    onClick = {},
+                    onClick = { showSheet.value = true },
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .size((54 + padding.value).dp)
@@ -143,7 +185,7 @@ fun AnniversaryScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(56.dp))
-                val name = name.value.uppercase()
+                val name = state.name.value.uppercase()
                 Text(
                     text = "TODAY $name IS",
                     style = TextStyle(
@@ -169,7 +211,7 @@ fun AnniversaryScreen(
                         contentDescription = null
                     )
                     Spacer(modifier = Modifier.width(22.dp))
-                    Numbers(age = mviViewModel.toDate(date.value))
+                    Numbers(age = viewModel.toDate(state.date.value))
                     Spacer(modifier = Modifier.width(22.dp))
                     Image(
                         modifier = Modifier
@@ -180,7 +222,7 @@ fun AnniversaryScreen(
                     )
                 }
                 Spacer(modifier = Modifier.height(14.dp))
-                val subTitle = date.value.getYearOrMonth(date.value.age)
+                val subTitle = state.date.value.getYearOrMonth(state.date.value.age)
                 Text(
                     text = "$subTitle OLD ",
                     style = TextStyle(

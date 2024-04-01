@@ -2,8 +2,6 @@
 
 package com.alexnemyr.happybirthday.ui.flow.input
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,8 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
@@ -37,9 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -47,14 +40,20 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
+import com.alexnemyr.happybirthday.BirthdayViewModel
 import com.alexnemyr.happybirthday.R
 import com.alexnemyr.happybirthday.TAG
+import com.alexnemyr.happybirthday.ui.common.BirthdayState
+import com.alexnemyr.happybirthday.ui.common.CameraPicker
+import com.alexnemyr.happybirthday.ui.common.Photo
+import com.alexnemyr.happybirthday.ui.common.PhotoPicker
+import com.alexnemyr.happybirthday.ui.common.PickerBottomSheet
+import com.alexnemyr.happybirthday.ui.common.buttonHeight
 import timber.log.Timber
 
 @Composable
 fun InputScreen(
-    mviViewModel: InputViewModel
+    mviViewModel: BirthdayViewModel
 ) {
 
     val state = mviViewModel.state.collectAsState()
@@ -78,7 +77,6 @@ fun InputScreen(
                 "\nname = ${name.value}" +
                 "\ndate = ${date.value}" +
                 "\ncapturedImageUri = ${capturedImageUri.value}" +
-                "\n" +
                 "\nstate = ${state.value}"
     )
 
@@ -105,7 +103,7 @@ fun InputScreen(
         InputDetails(
             innerPadding,
             showSheet,
-            InputState(capturedImageUri, name, date),
+            BirthdayState(capturedImageUri, name, date),
             navTo = { mviViewModel.navTo(false) }
         )
     }
@@ -115,7 +113,7 @@ fun InputScreen(
 fun InputDetails(
     innerPadding: PaddingValues,
     showSheet: MutableState<Boolean>,
-    state: InputState,
+    state: BirthdayState,
     navTo: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -164,25 +162,7 @@ fun InputDetails(
                     .height(buttonHeight),
             ) { Text(text = "Picture") }
 
-            if (state.capturedImageUri.value.path?.isNotEmpty() == true) {
-                AsyncImage(
-                    model = state.capturedImageUri.value,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(100))
-                        .size(photoSize),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Image(
-                    modifier = Modifier
-                        .background(Color.Transparent, RoundedCornerShape(100))
-                        .size(photoSize),
-                    painter = painterResource(id = R.drawable.empty_image),
-                    contentScale = ContentScale.Crop,
-                    contentDescription = null
-                )
-            }
+            Photo(state, painterResource(id = R.drawable.ic_smile_fox), Modifier)
 
         }
         //next

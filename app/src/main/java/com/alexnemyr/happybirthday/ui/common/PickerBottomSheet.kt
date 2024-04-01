@@ -1,4 +1,4 @@
-package com.alexnemyr.happybirthday.ui.flow.input
+package com.alexnemyr.happybirthday.ui.common
 
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.material3.BottomSheetDefaults

@@ -10,14 +10,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.alexnemyr.happybirthday.ui.flow.anniversary.AnniversaryScreen
 import com.alexnemyr.happybirthday.ui.flow.input.InputScreen
-import com.alexnemyr.happybirthday.ui.flow.input.InputViewModel
 import com.alexnemyr.happybirthday.ui.theme.HappyBirthdayTheme
 import org.koin.android.ext.android.inject
 import timber.log.Timber
 
 class MainActivity : ComponentActivity() {
 
-    private val viewModel: InputViewModel by inject()
+    private val viewModel: BirthdayViewModel by inject()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
