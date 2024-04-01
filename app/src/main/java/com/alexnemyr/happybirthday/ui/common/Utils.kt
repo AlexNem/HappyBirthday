@@ -1,4 +1,4 @@
-package com.alexnemyr.happybirthday.ui.flow.anniversary
+package com.alexnemyr.happybirthday.ui.common
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
@@ -10,7 +10,7 @@ import java.util.Calendar
 import java.util.Date
 
 enum class BGType {
-    FOX, PELICAN//, ELEPHANT
+    FOX, PELICAN//, ELEPHANT //todo: crash with elephant vector drawable
 }
 
 data class AnniversaryRes(
