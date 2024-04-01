@@ -1,4 +1,4 @@
-package com.alexnemyr.happybirthday.ui.input
+package com.alexnemyr.happybirthday.ui.flow.input
 
 import android.net.Uri
 import androidx.compose.runtime.MutableState
