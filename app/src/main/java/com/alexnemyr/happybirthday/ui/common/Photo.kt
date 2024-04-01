@@ -10,15 +10,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 
 @Composable
 fun Photo(state: BirthdayState, painter: Painter, modifier: Modifier) {
     Box(modifier) {
         if (state.capturedImageUri.value.path?.isNotEmpty() == true) {
+            val request =
+                ImageRequest.Builder(LocalContext.current)
+                    .data(state.capturedImageUri.value)
+                    .allowHardware(false)
+                    .build()
             AsyncImage(
-                model = state.capturedImageUri.value,
+                model = request,
                 contentDescription = null,
                 modifier = Modifier
                     .clip(RoundedCornerShape(100))
