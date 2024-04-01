@@ -1,4 +1,4 @@
-package com.alexnemyr.happybirthday.ui.input
+package com.alexnemyr.happybirthday.ui.flow.input
 
 import androidx.compose.ui.unit.dp
 

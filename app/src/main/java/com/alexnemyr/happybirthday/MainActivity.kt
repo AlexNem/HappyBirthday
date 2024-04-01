@@ -5,17 +5,31 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.alexnemyr.happybirthday.ui.input.InputScreen
+import com.alexnemyr.happybirthday.ui.flow.anniversary.AnniversaryScreen
+import com.alexnemyr.happybirthday.ui.flow.input.InputScreen
+import com.alexnemyr.happybirthday.ui.flow.input.InputViewModel
 import com.alexnemyr.happybirthday.ui.theme.HappyBirthdayTheme
+import org.koin.android.ext.android.inject
+import timber.log.Timber
 
 class MainActivity : ComponentActivity() {
+
+    private val viewModel: InputViewModel by inject()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             HappyBirthdayTheme {
-                InputScreen()
+                val navState = viewModel.navigationState.collectAsState()
+                if (navState.value) {
+                    InputScreen(viewModel)
+                } else {
+                    AnniversaryScreen(viewModel)
+                }
+                Timber.tag("NAVIG").i("navState = ${navState.value}")
+
             }
         }
     }

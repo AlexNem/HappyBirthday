@@ -1,8 +1,7 @@
 @file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 
-package com.alexnemyr.happybirthday.ui.input
+package com.alexnemyr.happybirthday.ui.flow.input
 
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -41,7 +40,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -52,16 +50,14 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.alexnemyr.happybirthday.R
 import com.alexnemyr.happybirthday.TAG
-import org.koin.androidx.compose.koinViewModel
 import timber.log.Timber
 
 @Composable
-fun InputScreen() {
-
-    val mviViewModel = koinViewModel<InputViewModel>()
+fun InputScreen(
+    mviViewModel: InputViewModel
+) {
 
     val state = mviViewModel.state.collectAsState()
-
 
     val showSheet = remember { mutableStateOf(false) }
 
@@ -106,7 +102,12 @@ fun InputScreen() {
     }
 
     Toolbar { innerPadding ->
-        InputDetails(innerPadding, showSheet, InputState(capturedImageUri, name, date))
+        InputDetails(
+            innerPadding,
+            showSheet,
+            InputState(capturedImageUri, name, date),
+            navTo = { mviViewModel.navTo(false) }
+        )
     }
 }
 
@@ -114,7 +115,8 @@ fun InputScreen() {
 fun InputDetails(
     innerPadding: PaddingValues,
     showSheet: MutableState<Boolean>,
-    state: InputState
+    state: InputState,
+    navTo: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -151,7 +153,8 @@ fun InputDetails(
                     showDialog.value = true
                 })
             Date(
-                onOk = { date -> onOk(date) }, showDialog = showDialog
+                onOk = { date -> onOk(date) },
+                showDialog = showDialog
             )
             //picture
             Button(
@@ -170,9 +173,6 @@ fun InputDetails(
                         .size(photoSize),
                     contentScale = ContentScale.Crop
                 )
-                Timber.tag(TAG)
-                    .i("isNotEmpty() == true// capturedImageUri = ${state.capturedImageUri.value}")
-
             } else {
                 Image(
                     modifier = Modifier
@@ -187,14 +187,11 @@ fun InputDetails(
         }
         //next
         if (state.name.value.isNotBlank() && state.date.value != 0L) {
-            val context = LocalContext.current
             Column(
                 modifier = Modifier.align(Alignment.BottomCenter)
             ) {
                 Button(
-                    onClick = {
-                        Toast.makeText(context, "Show birthday screen", Toast.LENGTH_SHORT).show()
-                    }, //todo
+                    onClick = navTo,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(buttonHeight)
@@ -229,22 +226,32 @@ fun Toolbar(
 
 @Composable
 private fun Date(
-    onOk: (date: Long?) -> Unit, showDialog: MutableState<Boolean>
+    onOk: (date: Long?) -> Unit,
+    showDialog: MutableState<Boolean>
 ) {
     val datePickerState = rememberDatePickerState()
+
+    datePickerState.selectedDateMillis?.let {
+        Timber.tag("Date ->").e("datePickerState $it")
+        onOk(it)
+    }
+
     if (showDialog.value) {
-        DatePickerDialog(onDismissRequest = { showDialog.value = false }, confirmButton = {
-            TextButton(onClick = {
-                onOk(datePickerState.selectedDateMillis)
-                showDialog.value = false
-            }) {
-                Text("Ok")
+        DatePickerDialog(
+            onDismissRequest = { showDialog.value = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDialog.value = false
+                }) {
+                    Text("Ok")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog.value = false }) {
+                    Text("Cancel")
+                }
             }
-        }, dismissButton = {
-            TextButton(onClick = { showDialog.value = false }) {
-                Text("Cancel")
-            }
-        }) {
+        ) {
             DatePicker(state = datePickerState)
         }
     }
