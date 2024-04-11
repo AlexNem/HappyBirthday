@@ -16,6 +16,7 @@ mvikotlinExtensionsCoroutines = "3.3.0"
 mvikotlinLogging = "3.3.0"
 mvikotlinMain = "3.3.0"
 mvikotlinTimetravel = "3.3.0"
+navigationCompose = "2.7.7"
 timberVersion = "5.0.1"
 jetbrainsKotlinJvm = "1.9.0"
 appcompat = "1.6.1"
@@ -23,6 +24,7 @@ material = "1.11.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

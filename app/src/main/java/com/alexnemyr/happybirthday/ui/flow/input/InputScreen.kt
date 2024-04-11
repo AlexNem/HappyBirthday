@@ -40,9 +40,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.alexnemyr.happybirthday.BirthdayViewModel
+import androidx.navigation.NavHostController
 import com.alexnemyr.happybirthday.R
 import com.alexnemyr.happybirthday.TAG
+import com.alexnemyr.happybirthday.navigation.Screen
 import com.alexnemyr.happybirthday.ui.common.BirthdayState
 import com.alexnemyr.happybirthday.ui.common.CameraPicker
 import com.alexnemyr.happybirthday.ui.common.Photo
@@ -53,19 +54,20 @@ import timber.log.Timber
 
 @Composable
 fun InputScreen(
-    mviViewModel: BirthdayViewModel
+    viewModel: InputViewModel,
+    navController: NavHostController
 ) {
 
-    val state = mviViewModel.state.collectAsState()
+    val state = viewModel.state.collectAsState()
 
     val showSheet = remember { mutableStateOf(false) }
 
-    val capturedImageUri = remember { mviViewModel.mutableState.value.capturedImageUri }
-    val name = remember { mviViewModel.mutableState.value.name }
-    val date = remember { mviViewModel.mutableState.value.date }
+    val capturedImageUri = remember { viewModel.mutableState.value.capturedImageUri }
+    val name = remember { viewModel.mutableState.value.name }
+    val date = remember { viewModel.mutableState.value.date }
 
     SideEffect {
-        mviViewModel.saveInfo(
+        viewModel.saveInfo(
             state.value.name.value,
             state.value.date.value.toString(),
             state.value.capturedImageUri.value.toString(),
@@ -104,7 +106,9 @@ fun InputScreen(
             innerPadding,
             showSheet,
             BirthdayState(capturedImageUri, name, date),
-            navTo = { mviViewModel.navTo(false) }
+            navTo = {
+                navController.navigate(Screen.AnniversaryBitmapWrapperScreen.name)
+            }
         )
     }
 }

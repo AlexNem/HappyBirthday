@@ -86,6 +86,8 @@ dependencies {
     implementation(libs.koin.androidx.compose)
     implementation(libs.koin.annotations)
     implementation(libs.koin.ksp.compiler)
+    //navigation
+    implementation(libs.androidx.navigation.compose)
 
     implementation(project(":core:repository"))
 }

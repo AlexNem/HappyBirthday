@@ -35,22 +35,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.alexnemyr.happybirthday.R
-import com.alexnemyr.happybirthday.BirthdayViewModel
-import com.alexnemyr.happybirthday.ui.common.Age
-import com.alexnemyr.happybirthday.ui.common.AnniversaryRes
-import com.alexnemyr.happybirthday.ui.common.BGType
 import com.alexnemyr.happybirthday.ui.common.BirthdayState
 import com.alexnemyr.happybirthday.ui.common.CameraPicker
-import com.alexnemyr.happybirthday.ui.common.NumberIcon
 import com.alexnemyr.happybirthday.ui.common.Photo
 import com.alexnemyr.happybirthday.ui.common.PhotoPicker
 import com.alexnemyr.happybirthday.ui.common.PickerBottomSheet
-import com.alexnemyr.happybirthday.ui.common.age
-import com.alexnemyr.happybirthday.ui.common.getYearOrMonth
+import com.alexnemyr.happybirthday.ui.common.util.Age
+import com.alexnemyr.happybirthday.ui.common.util.NumberIcon
+import com.alexnemyr.happybirthday.ui.common.util.age
+import com.alexnemyr.happybirthday.ui.common.util.getAnniversaryResources
+import com.alexnemyr.happybirthday.ui.common.util.getYearOrMonth
+import com.alexnemyr.happybirthday.ui.common.util.toDate
 
 @Composable
 fun AnniversaryScreen(
-    viewModel: BirthdayViewModel
+    viewModel: AnniversaryViewModel,
+    onBackNav: () -> Unit
 ) {
 
     val showSheet = remember { mutableStateOf(false) }
@@ -78,46 +78,26 @@ fun AnniversaryScreen(
         })
     }
 
-
-    Anniversary(
+    AnniversaryContent(
         showSheet,
         BirthdayState(capturedImageUri, name, date),
-        viewModel,
+        onBackNav
     )
 
 }
 
 @Composable
-fun Anniversary(
+fun AnniversaryContent(
     showSheet: MutableState<Boolean>,
     state: BirthdayState,
-    viewModel: BirthdayViewModel,
+    onBackNav: () -> Unit
 ) {
 
-    val bgList = listOf(BGType.FOX, BGType.PELICAN)
-    val bg: AnniversaryRes = when (bgList.random()) {
-        BGType.FOX -> AnniversaryRes(
-            color = colorResource(id = R.color.bg_fox),
-            painter = painterResource(id = R.drawable.bg_fox),
-            bntColor = colorResource(id = R.color.btn_fox),
-            bntBGColor = colorResource(id = R.color.btn_bg_fox),
-            bntIcon = painterResource(id = R.drawable.ic_smile_fox),
-            bntAddIcon = painterResource(id = R.drawable.ic_add_fox),
-        )
-
-        BGType.PELICAN -> AnniversaryRes(
-            color = colorResource(id = R.color.bg_pelican),
-            painter = painterResource(id = R.drawable.bg_pelican),
-            bntColor = colorResource(id = R.color.btn_pelican),
-            bntBGColor = colorResource(id = R.color.btn_bg_pelican),
-            bntIcon = painterResource(id = R.drawable.ic_smile_pelican),
-            bntAddIcon = painterResource(id = R.drawable.ic_add_pelican),
-        )
-    }
+    val bg = remember { mutableStateOf(getAnniversaryResources()) }.value
 
     Box(
         modifier = Modifier
-            .background(bg.color)
+            .background(colorResource(id = bg.backgroundColor))
             .fillMaxSize()
     ) {
 
@@ -125,7 +105,8 @@ fun Anniversary(
             modifier = Modifier
                 .padding(16.dp)
                 .align(Alignment.TopStart),
-            onClick = { viewModel.navTo(true) }) {
+            onClick = onBackNav
+        ) {
             Icon(painterResource(id = R.drawable.ic_navigate), contentDescription = null)
         }
 
@@ -143,11 +124,14 @@ fun Anniversary(
             ) {
                 Box(
                     modifier = Modifier
-                        .border(BorderStroke(8.dp, bg.bntColor), shape = CircleShape)
-                        .background(bg.bntBGColor, CircleShape)
+                        .border(
+                            border = BorderStroke(8.dp, colorResource(id = bg.btnColor)),
+                            shape = CircleShape
+                        )
+                        .background(colorResource(id = bg.btnBGColor), CircleShape)
                         .size(300.dp)
                 )
-                Photo(state, bg.bntIcon, Modifier.align(Alignment.Center))
+                Photo(state, painterResource(id = bg.btnIcon), Modifier.align(Alignment.Center))
 
                 val padding = 20.dp
                 IconButton(
@@ -160,7 +144,7 @@ fun Anniversary(
                     Image(
                         modifier = Modifier
                             .size(54.dp),
-                        painter = bg.bntAddIcon,
+                        painter = painterResource(id = bg.btnAddIcon),
                         contentDescription = null,
                         contentScale = ContentScale.Crop
                     )
@@ -174,7 +158,7 @@ fun Anniversary(
             modifier = Modifier
                 .fillMaxSize()
                 .paint(
-                    painter = bg.painter,
+                    painter = painterResource(id = bg.backgroundDrawable),
                     contentScale = ContentScale.FillBounds
                 )
 
@@ -211,7 +195,7 @@ fun Anniversary(
                         contentDescription = null
                     )
                     Spacer(modifier = Modifier.width(22.dp))
-                    Numbers(age = viewModel.toDate(state.date.value))
+                    Numbers(age = toDate(state.date.value))
                     Spacer(modifier = Modifier.width(22.dp))
                     Image(
                         modifier = Modifier
