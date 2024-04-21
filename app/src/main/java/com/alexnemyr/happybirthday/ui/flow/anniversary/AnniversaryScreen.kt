@@ -21,6 +21,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -35,7 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.alexnemyr.happybirthday.R
-import com.alexnemyr.happybirthday.ui.common.BirthdayState
+import com.alexnemyr.happybirthday.ui.common.UserState
 import com.alexnemyr.happybirthday.ui.common.CameraPicker
 import com.alexnemyr.happybirthday.ui.common.Photo
 import com.alexnemyr.happybirthday.ui.common.PhotoPicker
@@ -55,9 +56,7 @@ fun AnniversaryScreen(
 
     val showSheet = remember { mutableStateOf(false) }
 
-    val capturedImageUri = remember { viewModel.mutableState.value.capturedImageUri }
-    val name = remember { viewModel.mutableState.value.name }
-    val date = remember { viewModel.mutableState.value.date }
+    val viewState = viewModel.state.collectAsState().value
 
     if (showSheet.value) {
         PickerBottomSheet(onDismiss = { showSheet.value = false }, content = {
@@ -67,11 +66,12 @@ fun AnniversaryScreen(
                 modifier = Modifier.padding(vertical = 32.dp)
             ) {
                 PhotoPicker(onSelect = { uri ->
-                    capturedImageUri.value = uri
+//                    capturedImageUri.value = uri //todo: fix
+
                     showSheet.value = false
                 })
                 CameraPicker(onSelect = { uri ->
-                    capturedImageUri.value = uri
+//                    capturedImageUri.value = uri //todo: fix
                     showSheet.value = false
                 })
             }
@@ -80,7 +80,7 @@ fun AnniversaryScreen(
 
     AnniversaryContent(
         showSheet,
-        BirthdayState(capturedImageUri, name, date),
+        viewState,
         onBackNav
     )
 
@@ -89,7 +89,7 @@ fun AnniversaryScreen(
 @Composable
 fun AnniversaryContent(
     showSheet: MutableState<Boolean>,
-    state: BirthdayState,
+    state: UserState,
     onBackNav: () -> Unit
 ) {
 
@@ -169,7 +169,7 @@ fun AnniversaryContent(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(56.dp))
-                val name = state.name.value.uppercase()
+                val name = state.name?.uppercase()
                 Text(
                     text = "TODAY $name IS",
                     style = TextStyle(
@@ -195,7 +195,7 @@ fun AnniversaryContent(
                         contentDescription = null
                     )
                     Spacer(modifier = Modifier.width(22.dp))
-                    Numbers(age = toDate(state.date.value))
+                    Numbers(age = toDate(state.date))
                     Spacer(modifier = Modifier.width(22.dp))
                     Image(
                         modifier = Modifier
@@ -206,7 +206,9 @@ fun AnniversaryContent(
                     )
                 }
                 Spacer(modifier = Modifier.height(14.dp))
-                val subTitle = state.date.value.getYearOrMonth(state.date.value.age)
+
+                val subTitle = state.date?.getYearOrMonth(state.date.age)
+
                 Text(
                     text = "$subTitle OLD ",
                     style = TextStyle(

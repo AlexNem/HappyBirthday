@@ -9,7 +9,7 @@ import java.util.Calendar
 import java.util.Date
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun toDate(age: Long?): Age {
+fun toDate(age: String?): Age {
     return age?.let {
         val birthdayCal: Calendar = Calendar.getInstance().apply { time = Date(it) }
         val resultAge = birthdayCal.age

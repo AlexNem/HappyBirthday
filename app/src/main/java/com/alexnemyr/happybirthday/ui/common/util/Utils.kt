@@ -48,11 +48,11 @@ data class AnniversaryResources(
 
 
 
-fun Long.getYearOrMonth(age: Age): String =
+fun String.getYearOrMonth(age: Age): String =
     if (age.year == 0) "MONTH"
     else "YEAR"
 
-val Long.age: Age
+val String.age: Age
     get() {
         val birthdayCal: Calendar = Calendar.getInstance().apply { time = Date(this@age) }
         val resultAge = birthdayCal.age

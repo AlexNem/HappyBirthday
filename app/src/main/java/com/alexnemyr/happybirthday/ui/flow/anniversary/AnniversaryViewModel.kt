@@ -1,11 +1,8 @@
 package com.alexnemyr.happybirthday.ui.flow.anniversary
 
-import android.net.Uri
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.alexnemyr.happybirthday.TAG
-import com.alexnemyr.happybirthday.ui.common.BirthdayState
+import com.alexnemyr.happybirthday.ui.common.UserState
 import com.alexnemyr.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,15 +12,14 @@ class AnniversaryViewModel(
     private val userRepository: UserRepository
 ) : ViewModel() {
 
-    val mutableState: MutableStateFlow<BirthdayState> = MutableStateFlow(
-
-        BirthdayState(
-            capturedImageUri = mutableStateOf(Uri.EMPTY), //Uri.parse(userRepository.user.uri)
-            name = mutableStateOf(userRepository.user.name ?: ""),
-            date = mutableLongStateOf(userRepository.user.date?.toLongOrNull() ?: 2)
+    private val mutableState: MutableStateFlow<UserState> = MutableStateFlow(
+        UserState(
+            name = userRepository.user.name,
+            date = userRepository.user.date,
+            uriPath = userRepository.user.uri
         )
     )
-    val state: StateFlow<BirthdayState> = mutableState
+    val state: StateFlow<UserState> = mutableState
 
     init {
         val repo = userRepository.user
