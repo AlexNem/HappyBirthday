@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.test.usecase"
+    namespace = "com.alexnemyr.domain"
     compileSdk = 34
 
     defaultConfig {
@@ -34,19 +34,19 @@ android {
 
 dependencies {
 
-    implementation(project(":core:repository"))
-    implementation(project(":core:domain"))
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
     //DI
     implementation(libs.koin.core)
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
     implementation(libs.koin.annotations)
     implementation(libs.koin.ksp.compiler)
+    //logging
+    implementation(libs.timber)
 }

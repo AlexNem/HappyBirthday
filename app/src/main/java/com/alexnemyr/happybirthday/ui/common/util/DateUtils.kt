@@ -1,19 +1,17 @@
 package com.alexnemyr.happybirthday.ui.common.util
 
-import android.os.Build
-import androidx.annotation.RequiresApi
+import com.alexnemyr.domain.util.TAG
 import timber.log.Timber
 import java.time.LocalDate
 import java.time.Period
 import java.util.Calendar
 import java.util.Date
 
-@RequiresApi(Build.VERSION_CODES.O)
 fun toDate(age: String?): Age {
     return age?.let {
         val birthdayCal: Calendar = Calendar.getInstance().apply { time = Date(it) }
         val resultAge = birthdayCal.age
-        Timber.tag("Date ->").e("\nresultAge = $resultAge")
+        Timber.tag(TAG).e("\nresultAge = $resultAge")
         resultAge
     } ?: Age(0, 0)
 }

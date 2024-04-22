@@ -14,7 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.alexnemyr.happybirthday.TAG
+import com.alexnemyr.domain.util.TAG
 import timber.log.Timber
 
 @Composable

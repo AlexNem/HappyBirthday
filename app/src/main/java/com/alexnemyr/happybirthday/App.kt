@@ -3,8 +3,8 @@ package com.alexnemyr.happybirthday
 import android.app.Application
 import com.alexnemyr.happybirthday.di.mviModule
 import com.alexnemyr.happybirthday.di.viewModelModule
-import com.alexnemyr.repository.di.repositoryModule
-import com.alexnemyr.repository.di.storageModule
+import com.alexnemyr.usecase.di.repositoryModule
+import com.alexnemyr.usecase.di.storageModule
 import com.alexnemyr.usecase.di.useCaseModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -40,5 +40,3 @@ class App : Application() {
         }
     }
 }
-
-const val TAG = "TEST_TAG"

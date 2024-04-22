@@ -1,7 +1,7 @@
 package com.alexnemyr.happybirthday.ui.common.util
 
+import com.alexnemyr.domain.util.TAG
 import com.alexnemyr.happybirthday.R
-import com.alexnemyr.happybirthday.TAG
 import timber.log.Timber
 import java.util.Calendar
 import java.util.Date
@@ -21,6 +21,7 @@ val BGType.resources: AnniversaryResources
                 btnIcon = R.drawable.ic_smile_fox,
                 btnAddIcon = R.drawable.ic_add_fox,
             )
+
             BGType.PELICAN -> AnniversaryResources(
                 backgroundColor = R.color.bg_pelican,
                 backgroundDrawable = R.drawable.bg_pelican,
@@ -45,7 +46,6 @@ data class AnniversaryResources(
     val btnIcon: Int,
     val btnAddIcon: Int,
 )
-
 
 
 fun String.getYearOrMonth(age: Age): String =

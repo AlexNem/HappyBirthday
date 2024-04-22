@@ -56,8 +56,8 @@ android {
 
 dependencies {
 
-    implementation(project(":core:repository")) //todo: replace to useCase
-    implementation(project(":core:usecase")) //todo: replace to useCase
+    implementation(project(":core:domain"))
+    implementation(project(":core:usecase"))
     implementation(project(":core:mvi"))
 
     implementation(libs.androidx.core.ktx)
@@ -75,8 +75,9 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
+    //logging
     implementation(libs.timber)
+    //coil
     implementation(libs.coil.compose)
     //MVI Kotlin
     implementation(libs.mvikotlin)

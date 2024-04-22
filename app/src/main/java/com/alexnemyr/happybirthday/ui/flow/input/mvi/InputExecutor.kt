@@ -1,9 +1,9 @@
 package com.alexnemyr.happybirthday.ui.flow.input.mvi
 
-import com.alexnemyr.happybirthday.ui.common.UserState
-import com.alexnemyr.happybirthday.ui.common.toDomain
+import com.alexnemyr.domain.mapper.toDomain
+import com.alexnemyr.domain.view_state.UserState
 import com.alexnemyr.mvi.MviExecutor
-import com.alexnemyr.repository.UserRepository
+import com.alexnemyr.usecase.SaveUserUseCase
 import com.alexnemyr.usecase.UserFlowUseCase
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 
 class InputExecutor(
     private val userFlowUseCase: UserFlowUseCase,
-    private val userRepository: UserRepository
+    private val saveUserUseCase: SaveUserUseCase
 ) : MviExecutor<InputStore.Intent, InputStore.Action, InputStore.State, InputStore.Message, InputStore.Label>() {
 
     private var job: Job? = null
@@ -40,8 +40,11 @@ class InputExecutor(
     }
 
     private fun editUser(state: UserState) {
-        userRepository.saveUser(user = state.toDomain)
-        dispatch(InputStore.Message.UserData(state))
+        job?.cancel()
+        job = scope.launch {
+            saveUserUseCase.invoke(user = state.toDomain)
+            dispatch(InputStore.Message.UserData(state))
+        }
     }
 
 }

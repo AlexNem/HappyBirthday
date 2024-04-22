@@ -36,7 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.alexnemyr.happybirthday.R
-import com.alexnemyr.happybirthday.ui.common.UserState
+import com.alexnemyr.domain.view_state.UserState
 import com.alexnemyr.happybirthday.ui.common.CameraPicker
 import com.alexnemyr.happybirthday.ui.common.Photo
 import com.alexnemyr.happybirthday.ui.common.PhotoPicker
@@ -207,7 +207,7 @@ fun AnniversaryContent(
                 }
                 Spacer(modifier = Modifier.height(14.dp))
 
-                val subTitle = state.date?.getYearOrMonth(state.date.age)
+                val subTitle = state.date?.getYearOrMonth(state.date!!.age)
 
                 Text(
                     text = "$subTitle OLD ",

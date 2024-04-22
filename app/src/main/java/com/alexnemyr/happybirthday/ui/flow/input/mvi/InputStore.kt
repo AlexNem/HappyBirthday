@@ -1,6 +1,6 @@
 package com.alexnemyr.happybirthday.ui.flow.input.mvi
 
-import com.alexnemyr.happybirthday.ui.common.UserState
+import com.alexnemyr.domain.view_state.UserState
 import com.arkivanov.mvikotlin.core.store.Store
 
 interface InputStore : Store<InputStore.Intent, InputStore.State, InputStore.Label> {

@@ -43,14 +43,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.alexnemyr.domain.util.TAG
+import com.alexnemyr.domain.view_state.UserState
 import com.alexnemyr.happybirthday.R
-import com.alexnemyr.happybirthday.TAG
 import com.alexnemyr.happybirthday.navigation.Screen
 import com.alexnemyr.happybirthday.ui.common.CameraPicker
 import com.alexnemyr.happybirthday.ui.common.Photo
 import com.alexnemyr.happybirthday.ui.common.PhotoPicker
 import com.alexnemyr.happybirthday.ui.common.PickerBottomSheet
-import com.alexnemyr.happybirthday.ui.common.UserState
 import com.alexnemyr.happybirthday.ui.common.buttonHeight
 import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore
 import timber.log.Timber

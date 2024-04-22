@@ -1,6 +1,6 @@
 package com.alexnemyr.happybirthday.ui.flow.input.mvi
 
-import com.alexnemyr.happybirthday.ui.common.toViewState
+import com.alexnemyr.domain.mapper.toViewState
 import com.alexnemyr.mvi.MviBootstrapper
 import com.alexnemyr.usecase.UserFlowUseCase
 import kotlinx.coroutines.launch

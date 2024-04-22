@@ -24,8 +24,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import com.alexnemyr.domain.util.TAG
 import com.alexnemyr.happybirthday.BuildConfig
-import com.alexnemyr.happybirthday.TAG
 import timber.log.Timber
 import java.io.File
 import java.text.SimpleDateFormat
