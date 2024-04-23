@@ -1,9 +1,13 @@
 package com.alexnemyr.happybirthday.ui.flow.input.mvi
 
 import com.alexnemyr.domain.domain.UserDomain
+import com.alexnemyr.happybirthday.ui.common.state.Error
+import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore.Intent
+import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore.Label
+import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore.State
 import com.arkivanov.mvikotlin.core.store.Store
 
-interface InputStore : Store<InputStore.Intent, InputStore.State, InputStore.Label> {
+interface InputStore : Store<Intent, State, Label> {
 
     sealed class Action {
         data class UpdateUser(val user: UserDomain) : Action()
@@ -28,7 +32,7 @@ interface InputStore : Store<InputStore.Intent, InputStore.State, InputStore.Lab
         val error: Error?
     ) {
         companion object {
-            val nullState = State(
+            val EMPTY_STATE = State(
                 name = null,
                 date = null,
                 uri = null,
@@ -36,11 +40,6 @@ interface InputStore : Store<InputStore.Intent, InputStore.State, InputStore.Lab
             )
         }
     }
-
-    data class Error(
-        val show: Boolean = false,
-        val message: String?
-    )
 
     sealed class Message {
         data object Progress : Message()

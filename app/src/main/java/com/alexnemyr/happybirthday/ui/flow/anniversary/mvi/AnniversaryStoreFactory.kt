@@ -1,5 +1,8 @@
 package com.alexnemyr.happybirthday.ui.flow.anniversary.mvi
 
+import com.alexnemyr.happybirthday.ui.flow.anniversary.mvi.AnniversaryStore.Intent
+import com.alexnemyr.happybirthday.ui.flow.anniversary.mvi.AnniversaryStore.Label
+import com.alexnemyr.happybirthday.ui.flow.anniversary.mvi.AnniversaryStore.State
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 
@@ -11,9 +14,9 @@ class AnniversaryStoreFactory(
 ) {
     fun create(): AnniversaryStore {
         return object : AnniversaryStore,
-            Store<AnniversaryStore.Intent, AnniversaryStore.State, AnniversaryStore.Label> by storeFactory.create(
+            Store<Intent, State, Label> by storeFactory.create(
                 name = this.javaClass.simpleName,
-                initialState = AnniversaryStore.State.nullState,
+                initialState = State.EMPTY_STATE,
                 bootstrapper = bootstrapper,
                 executorFactory = ::getFactory,
                 reducer = reducer

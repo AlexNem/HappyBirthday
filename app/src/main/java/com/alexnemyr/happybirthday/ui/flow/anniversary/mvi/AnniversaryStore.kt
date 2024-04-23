@@ -1,11 +1,14 @@
 package com.alexnemyr.happybirthday.ui.flow.anniversary.mvi
 
 import com.alexnemyr.domain.domain.UserDomain
-import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore
+import com.alexnemyr.happybirthday.ui.common.state.Error
+import com.alexnemyr.happybirthday.ui.flow.anniversary.mvi.AnniversaryStore.Intent
+import com.alexnemyr.happybirthday.ui.flow.anniversary.mvi.AnniversaryStore.Label
+import com.alexnemyr.happybirthday.ui.flow.anniversary.mvi.AnniversaryStore.State
 import com.arkivanov.mvikotlin.core.store.Store
 
 interface AnniversaryStore :
-    Store<AnniversaryStore.Intent, AnniversaryStore.State, AnniversaryStore.Label> {
+    Store<Intent, State, Label> {
 
     sealed class Action {
         data class UpdateUser(val user: UserDomain) : Action()
@@ -20,15 +23,16 @@ interface AnniversaryStore :
     sealed class Label {
         data object NavigateToInput : Label()
     }
+
     data class State(
         val name: String?,
         val date: String?,
         val uri: String?,
         val isProgress: Boolean = false,
-        val error: InputStore.Error?
+        val error: Error?
     ) {
         companion object {
-            val nullState = State(
+            val EMPTY_STATE = State(
                 name = null,
                 date = null,
                 uri = null,

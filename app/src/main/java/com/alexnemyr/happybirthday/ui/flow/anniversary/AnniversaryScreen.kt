@@ -47,10 +47,13 @@ import com.alexnemyr.happybirthday.navigation.Screen
 import com.alexnemyr.happybirthday.ui.common.Photo
 import com.alexnemyr.happybirthday.ui.common.util.NumberIcon
 import com.alexnemyr.happybirthday.ui.common.util.getAnniversaryResources
-import com.alexnemyr.happybirthday.ui.flow.anniversary.mvi.AnniversaryStore
+import com.alexnemyr.happybirthday.ui.flow.anniversary.mvi.AnniversaryStore.Intent
+import com.alexnemyr.happybirthday.ui.flow.anniversary.mvi.AnniversaryStore.Label
+import com.alexnemyr.happybirthday.ui.flow.anniversary.mvi.AnniversaryStore.State
 import com.alexnemyr.happybirthday.ui.flow.input.PicturePicker
 import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
+
 
 @Composable
 fun AnniversaryScreen(
@@ -60,36 +63,36 @@ fun AnniversaryScreen(
 
     val mviState = viewModel.states.collectAsState(null).value
     val showSheet = remember { mutableStateOf(false) }
-    val viewState: MutableState<AnniversaryStore.State?> = remember { mutableStateOf(null) }
+    val viewState: MutableState<State?> = remember { mutableStateOf(null) }
 
 
     LaunchedEffect(key1 = mviState) {
-        viewModel.accept(AnniversaryStore.Intent.FetchUser)
+        viewModel.accept(Intent.FetchUser)
     }
 
     viewModel.labels.onEach {
         Timber.tag(TAG).d("label -> onEach $it")
         when (it) {
-            is AnniversaryStore.Label.NavigateToInput -> {
+            is Label.NavigateToInput -> {
                 navController.navigate(Screen.InputScreen.name)
             }
         }
     }.collectAsState(initial = null)
 
     when (mviState) {
-        is AnniversaryStore.State -> {
+        is State -> {
             viewState.value = mviState
             viewState.value?.let { state ->
                 AnniversaryContent(
                     showSheet = showSheet,
                     state = state,
-                    onBackNav = { viewModel.accept(AnniversaryStore.Intent.ShowInputScreen) }
+                    onBackNav = { viewModel.accept(Intent.ShowInputScreen) }
                 )
                 PicturePicker(
                     showSheet = showSheet.value,
                     onClosePicker = { showSheet.value = false },
                     onSelectPicture = { path ->
-                        viewModel.accept(AnniversaryStore.Intent.EditPicture(uri = path))
+                        viewModel.accept(Intent.EditPicture(uri = path))
                     }
                 )
             }
@@ -116,7 +119,7 @@ fun AnniversaryScreen(
 @Composable
 fun AnniversaryContent(
     showSheet: MutableState<Boolean>,
-    state: AnniversaryStore.State,
+    state: State,
     onBackNav: () -> Unit
 ) {
 

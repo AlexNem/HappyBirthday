@@ -52,7 +52,9 @@ import com.alexnemyr.happybirthday.ui.common.Photo
 import com.alexnemyr.happybirthday.ui.common.PhotoPicker
 import com.alexnemyr.happybirthday.ui.common.PickerBottomSheet
 import com.alexnemyr.happybirthday.ui.common.buttonHeight
-import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore
+import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore.Intent
+import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore.Label
+import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore.State
 import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
 
@@ -63,12 +65,12 @@ fun InputScreen(
 ) {
     val showSheet = remember { mutableStateOf(false) }
     val mviState = viewModel.states.collectAsState(null).value
-    val viewState: MutableState<InputStore.State?> = remember { mutableStateOf(null) }
+    val viewState: MutableState<State?> = remember { mutableStateOf(null) }
 
     viewModel.labels
         .onEach {
             when (it) {
-                is InputStore.Label.NavigateToAnniversary -> {
+                is Label.NavigateToAnniversary -> {
                     Timber.tag(TAG).d("label -> onEach $it")
                     navController.navigate(Screen.AnniversaryBitmapWrapperScreen.name)
                 }
@@ -77,7 +79,7 @@ fun InputScreen(
         .collectAsState(null).value
 
     when (mviState) {
-        is InputStore.State -> {
+        is State -> {
             viewState.value = mviState
         }
 
@@ -104,13 +106,13 @@ fun InputScreen(
                 showSheet = showSheet,
                 state = viewState.value,
                 onEditName = { name ->
-                    viewModel.accept(InputStore.Intent.EditName(name = name))
+                    viewModel.accept(Intent.EditName(name = name))
                 },
                 onDateChosen = { date ->
-                    viewModel.accept(InputStore.Intent.EditDate(date = date))
+                    viewModel.accept(Intent.EditDate(date = date))
                 },
                 navTo = {
-                    viewModel.accept(InputStore.Intent.ShowAnniversaryScreen)
+                    viewModel.accept(Intent.ShowAnniversaryScreen)
                 }
             )
 
@@ -118,7 +120,7 @@ fun InputScreen(
                 showSheet = showSheet.value,
                 onClosePicker = { showSheet.value = false },
                 onSelectPicture = { path ->
-                    viewModel.accept(InputStore.Intent.EditPicture(uri = path))
+                    viewModel.accept(Intent.EditPicture(uri = path))
                 }
             )
         }
@@ -160,7 +162,7 @@ fun PicturePicker(
 fun InputContent(
     innerPadding: PaddingValues,
     showSheet: MutableState<Boolean>,
-    state: InputStore.State?,
+    state: State?,
     onEditName: (name: String) -> Unit,
     onDateChosen: (date: String) -> Unit,
     navTo: () -> Unit

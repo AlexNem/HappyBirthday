@@ -1,6 +1,11 @@
 package com.alexnemyr.happybirthday.ui.flow.input.mvi
 
 import com.alexnemyr.domain.domain.UserDomain
+import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore.Action
+import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore.Intent
+import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore.Label
+import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore.Message
+import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore.State
 import com.alexnemyr.mvi.MviExecutor
 import com.alexnemyr.usecase.SaveUserUseCase
 import kotlinx.coroutines.Job
@@ -9,71 +14,71 @@ import kotlinx.coroutines.launch
 
 class InputExecutor(
     private val saveUserUseCase: SaveUserUseCase
-) : MviExecutor<InputStore.Intent, InputStore.Action, InputStore.State, InputStore.Message, InputStore.Label>() {
+) : MviExecutor<Intent, Action, State, Message, Label>() {
 
     private var job: Job? = null
 
-    override fun executeAction(action: InputStore.Action, getState: () -> InputStore.State) {
+    override fun executeAction(action: Action, getState: () -> State) {
         when (action) {
-            is InputStore.Action.UpdateUser -> setUser(action.user)
+            is Action.UpdateUser -> setUser(action.user)
         }
     }
 
-    override fun executeIntent(intent: InputStore.Intent, getState: () -> InputStore.State) {
+    override fun executeIntent(intent: Intent, getState: () -> State) {
         when (intent) {
-            is InputStore.Intent.EditName -> editName(name = intent.name, state = getState())
-            is InputStore.Intent.EditDate -> editDate(date = intent.date, state = getState())
-            is InputStore.Intent.EditPicture -> editUri(uri = intent.uri, state = getState())
-            is InputStore.Intent.ShowAnniversaryScreen -> navToAnniversary(getState())
+            is Intent.EditName -> editName(name = intent.name, state = getState())
+            is Intent.EditDate -> editDate(date = intent.date, state = getState())
+            is Intent.EditPicture -> editUri(uri = intent.uri, state = getState())
+            is Intent.ShowAnniversaryScreen -> navToAnniversary(getState())
         }
     }
 
     private fun setUser(user: UserDomain) {
         job?.cancel()
         job = scope.launch {
-            dispatch(InputStore.Message.Progress)
+            dispatch(Message.Progress)
             delay(1000)
-            dispatch(InputStore.Message.UserData(user))
+            dispatch(Message.UserData(user))
         }
     }
 
-    private fun editName(name: String, state: InputStore.State) {
+    private fun editName(name: String, state: State) {
         job?.cancel()
         job = scope.launch {
             val newState = state.copy(name = name)
             saveUserUseCase.invoke(user = newState.toDomain)
-            dispatch(InputStore.Message.UserData(newState.toDomain))
+            dispatch(Message.UserData(newState.toDomain))
         }
     }
 
-    private fun editDate(date: String, state: InputStore.State) {
+    private fun editDate(date: String, state: State) {
         job?.cancel()
         job = scope.launch {
             val newState = state.copy(date = date)
             saveUserUseCase.invoke(user = newState.toDomain)
-            dispatch(InputStore.Message.UserData(newState.toDomain))
+            dispatch(Message.UserData(newState.toDomain))
         }
     }
 
-    private fun editUri(uri: String, state: InputStore.State) {
+    private fun editUri(uri: String, state: State) {
         job?.cancel()
         job = scope.launch {
-            val newState = state.copy(uri = uri)
-            saveUserUseCase.invoke(user = newState.toDomain)
-            dispatch(InputStore.Message.UserData(newState.toDomain))
+            val newState = state.copy(uri = uri).toDomain
+            saveUserUseCase.invoke(user = newState)
+            dispatch(Message.UserData(newState))
         }
     }
 
-    private fun navToAnniversary(state: InputStore.State) {
+    private fun navToAnniversary(state: State) {
         if (state.date.isNullOrBlank() || state.name.isNullOrBlank()) {
-            dispatch(InputStore.Message.Error(Throwable(message = "Input Name and Date!")))
+            dispatch(Message.Error(Throwable(message = "Input Name and Date!")))
         } else {
-            publish(InputStore.Label.NavigateToAnniversary)
+            publish(Label.NavigateToAnniversary)
         }
     }
 }
 
-val InputStore.State.toDomain: UserDomain
+val State.toDomain: UserDomain
     get() = UserDomain(
         name = this.name,
         date = this.date,
