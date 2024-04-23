@@ -13,7 +13,7 @@ class AnniversaryStoreFactory(
         return object : AnniversaryStore,
             Store<AnniversaryStore.Intent, AnniversaryStore.State, AnniversaryStore.Label> by storeFactory.create(
                 name = this.javaClass.simpleName,
-                initialState = AnniversaryStore.State.Progress,
+                initialState = AnniversaryStore.State.nullState,
                 bootstrapper = bootstrapper,
                 executorFactory = ::getFactory,
                 reducer = reducer

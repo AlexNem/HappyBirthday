@@ -1,6 +1,5 @@
 package com.alexnemyr.happybirthday.ui.flow.anniversary
 
-import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -17,13 +16,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,7 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -48,11 +45,11 @@ import com.alexnemyr.domain.util.yearOrMonthTitle
 import com.alexnemyr.happybirthday.R
 import com.alexnemyr.happybirthday.navigation.Screen
 import com.alexnemyr.happybirthday.ui.common.Photo
-import com.alexnemyr.happybirthday.ui.common.state.BirthdayState
 import com.alexnemyr.happybirthday.ui.common.util.NumberIcon
 import com.alexnemyr.happybirthday.ui.common.util.getAnniversaryResources
 import com.alexnemyr.happybirthday.ui.flow.anniversary.mvi.AnniversaryStore
 import com.alexnemyr.happybirthday.ui.flow.input.PicturePicker
+import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
 
 @Composable
@@ -61,35 +58,27 @@ fun AnniversaryScreen(
     navController: NavHostController,
 ) {
 
-    val showSheet = remember { mutableStateOf(false) }
-
     val mviState = viewModel.states.collectAsState(null).value
+    val showSheet = remember { mutableStateOf(false) }
+    val viewState: MutableState<AnniversaryStore.State?> = remember { mutableStateOf(null) }
 
-    val viewState: MutableState<BirthdayState?> = remember {
-        mutableStateOf(null)
+
+    LaunchedEffect(key1 = mviState) {
+        viewModel.accept(AnniversaryStore.Intent.FetchUser)
     }
 
-    val label = viewModel.labels.collectAsState(null).value
-
-    SideEffect {
-        when (label) {
+    viewModel.labels.onEach {
+        Timber.tag(TAG).d("label -> onEach $it")
+        when (it) {
             is AnniversaryStore.Label.NavigateToInput -> {
                 navController.navigate(Screen.InputScreen.name)
             }
-
-            else -> {}
         }
-    }
-
-    Timber.tag(TAG).d("mviState -> $mviState")
+    }.collectAsState(initial = null)
 
     when (mviState) {
-        is AnniversaryStore.State.Data -> {
-            viewState.value = BirthdayState(
-                name = mviState.name,
-                date = mviState.date,
-                uriPath = mviState.uri
-            )
+        is AnniversaryStore.State -> {
+            viewState.value = mviState
             viewState.value?.let { state ->
                 AnniversaryContent(
                     showSheet = showSheet,
@@ -100,24 +89,22 @@ fun AnniversaryScreen(
                     showSheet = showSheet.value,
                     onClosePicker = { showSheet.value = false },
                     onSelectPicture = { path ->
-                        viewModel.accept(
-                            AnniversaryStore.Intent.Edit(state.copy(uriPath = path))
-                        )
+                        viewModel.accept(AnniversaryStore.Intent.EditPicture(uri = path))
                     }
                 )
             }
 
         }
 
-        is AnniversaryStore.State.Progress -> {
-            Box(modifier = Modifier.fillMaxSize()) {
-                CircularProgressIndicator(Modifier.align(Alignment.Center))
-            }
-        }
-
-        is AnniversaryStore.State.Error -> {
-            Toast.makeText(LocalContext.current, "Error", Toast.LENGTH_LONG).show()
-        }
+//        is AnniversaryStore.State.Progress -> {
+//            Box(modifier = Modifier.fillMaxSize()) {
+//                CircularProgressIndicator(Modifier.align(Alignment.Center))
+//            }
+//        }
+//
+//        is AnniversaryStore.State.Error -> {
+//            Toast.makeText(LocalContext.current, "Error", Toast.LENGTH_LONG).show()
+//        }
 
         else -> {
             Timber.tag(TAG).d("mviState is else $mviState")
@@ -129,7 +116,7 @@ fun AnniversaryScreen(
 @Composable
 fun AnniversaryContent(
     showSheet: MutableState<Boolean>,
-    state: BirthdayState,
+    state: AnniversaryStore.State,
     onBackNav: () -> Unit
 ) {
 
@@ -171,7 +158,7 @@ fun AnniversaryContent(
                         .background(colorResource(id = bg.btnBGColor), CircleShape)
                         .size(300.dp)
                 )
-                Photo(state, painterResource(id = bg.btnIcon), Modifier.align(Alignment.Center))
+                Photo(state.uri, painterResource(id = bg.btnIcon), Modifier.align(Alignment.Center))
 
                 val padding = 20.dp
                 IconButton(

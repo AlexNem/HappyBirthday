@@ -12,7 +12,7 @@ class InputStoreFactory(
     fun create(): InputStore {
         return object : InputStore, Store<InputStore.Intent, InputStore.State, InputStore.Label> by storeFactory.create(
             name = this.javaClass.simpleName,
-            initialState = InputStore.State.Progress,
+            initialState = InputStore.State.nullState,
             bootstrapper = bootstrapper,
             executorFactory = ::getFactory,
             reducer = reducer

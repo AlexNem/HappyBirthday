@@ -30,7 +30,6 @@ val mviModule = module {
             logFormatter = DefaultLogFormatter()
         )
         else DefaultStoreFactory()
-
     }
     //Input
     single { InputBootstrapper(get()) }
@@ -39,7 +38,7 @@ val mviModule = module {
     single { InputStoreFactory(get(), get(), get(), get()) }
     //Anniversary
     single { AnniversaryBootstrapper(get()) }
-    single { AnniversaryExecutor(get()) }
+    single { AnniversaryExecutor(get(), get()) }
     single { AnniversaryReducer() }
     single { AnniversaryStoreFactory(get(), get(), get(), get()) }
 }

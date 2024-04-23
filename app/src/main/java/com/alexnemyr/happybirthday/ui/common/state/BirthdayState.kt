@@ -9,11 +9,6 @@ data class BirthdayState(
     val uriPath: String?,
 )
 
-//data class Name(
-//    val name: String?,
-//    val isError: Boolean?
-//)
-
 val UserDomain.toViewState: BirthdayState
     get() {
         return BirthdayState(

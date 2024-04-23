@@ -14,15 +14,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.alexnemyr.happybirthday.ui.common.state.BirthdayState
 
 @Composable
-fun Photo(state: BirthdayState, painter: Painter, modifier: Modifier) {
+fun Photo(uriPath: String?, painter: Painter, modifier: Modifier) {
     Box(modifier) {
-        if (state.uriPath?.isNotEmpty() == true) {
+        if (uriPath.isNullOrBlank()) {
             val request =
                 ImageRequest.Builder(LocalContext.current)
-                    .data(state.uriPath)
+                    .data(uriPath)
                     .allowHardware(false)
                     .build()
             AsyncImage(

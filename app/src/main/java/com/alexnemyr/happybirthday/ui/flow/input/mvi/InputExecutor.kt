@@ -5,6 +5,7 @@ import com.alexnemyr.happybirthday.ui.common.state.toDomain
 import com.alexnemyr.mvi.MviExecutor
 import com.alexnemyr.usecase.SaveUserUseCase
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class InputExecutor(
@@ -21,8 +22,9 @@ class InputExecutor(
 
     override fun executeIntent(intent: InputStore.Intent, getState: () -> InputStore.State) {
         when (intent) {
-            is InputStore.Intent.Edit -> editUser(intent.user)
-//            is InputStore.Intent.EditName -> editName(intent.name, getState())
+            is InputStore.Intent.EditName -> editName(name = intent.name, state = getState())
+            is InputStore.Intent.EditDate -> editDate(date = intent.date, state = getState())
+            is InputStore.Intent.EditPicture -> editUri(uri = intent.uri, state = getState())
             is InputStore.Intent.ShowAnniversaryScreen -> navToAnniversary(getState())
         }
     }
@@ -30,55 +32,56 @@ class InputExecutor(
     private fun setUser(user: BirthdayState) {
         job?.cancel()
         job = scope.launch {
-//            dispatch(InputStore.Message.Progress)
-//            delay(100)
+            dispatch(InputStore.Message.Progress)
+            delay(1000)
             dispatch(InputStore.Message.UserData(user))
         }
     }
 
-    private fun editUser(state: BirthdayState) {
+    private fun editName(name: String, state: InputStore.State) {
         job?.cancel()
         job = scope.launch {
-            saveUserUseCase.invoke(user = state.toDomain)
-            dispatch(InputStore.Message.UserData(state))
+            val userState = BirthdayState(
+                name = name,
+                date = state.date,
+                uriPath = state.uri
+            )
+            saveUserUseCase.invoke(user = userState.toDomain)
+            dispatch(InputStore.Message.UserData(userState))
         }
     }
-//    private fun editName(name: String, state: InputStore.State) {
-//        job?.cancel()
-//        job = scope.launch {
-//            val userState = UserState(
-//                name =
-//            )
-//            saveUserUseCase.invoke(user = state.copy(name = name).toDomain)
-//            dispatch(InputStore.Message.UserData(state))
-//        }
-//    }
+
+    private fun editDate(date: String, state: InputStore.State) {
+        job?.cancel()
+        job = scope.launch {
+            val userState = BirthdayState(
+                name = state.name,
+                date = date,
+                uriPath = state.uri
+            )
+            saveUserUseCase.invoke(user = userState.toDomain)
+            dispatch(InputStore.Message.UserData(userState))
+        }
+    }
+
+    private fun editUri(uri: String, state: InputStore.State) {
+        job?.cancel()
+        job = scope.launch {
+            val userState = BirthdayState(
+                name = state.name,
+                date = state.date,
+                uriPath = uri
+            )
+            saveUserUseCase.invoke(user = userState.toDomain)
+            dispatch(InputStore.Message.UserData(userState))
+        }
+    }
 
     private fun navToAnniversary(state: InputStore.State) {
-        when(state) {
-            is InputStore.State.Data -> {
-                if (state.date.isNullOrBlank() || state.name.isNullOrBlank()) {
-                    dispatch(InputStore.Message.Error(Throwable(message = "Input Name and Date!")))
-                } else {
-                    publish(InputStore.Label.NavigateToAnniversary)
-                }
-            }
-            else -> {}
+        if (state.date.isNullOrBlank() || state.name.isNullOrBlank()) {
+            dispatch(InputStore.Message.Error(Throwable(message = "Input Name and Date!")))
+        } else {
+            publish(InputStore.Label.NavigateToAnniversary)
         }
-
-//        runCatching {
-//            val castedState = state as InputStore.State.Data
-//            Timber.tag(TAG).i("navToAnniversary state = $castedState")
-//            castedState
-//        }.onSuccess {
-//            if (it.date.isNullOrBlank() || it.name.isNullOrBlank()) {
-//                dispatch(InputStore.Message.Error(Throwable(message = "Input Name and Date!")))
-//            } else {
-//                publish(InputStore.Label.NavigateToAnniversary)
-//            }
-//        }.onFailure {
-//            dispatch(InputStore.Message.Error(it))
-//        }
     }
-
 }

@@ -1,10 +1,10 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class,
+@file:OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class,
     ExperimentalMaterial3Api::class
 )
 
 package com.alexnemyr.happybirthday.ui.flow.input
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,14 +29,12 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -47,7 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.alexnemyr.domain.util.TAG
-import com.alexnemyr.happybirthday.ui.common.state.BirthdayState
+import com.alexnemyr.domain.util.formattedDate
 import com.alexnemyr.happybirthday.R
 import com.alexnemyr.happybirthday.navigation.Screen
 import com.alexnemyr.happybirthday.ui.common.CameraPicker
@@ -55,74 +52,47 @@ import com.alexnemyr.happybirthday.ui.common.Photo
 import com.alexnemyr.happybirthday.ui.common.PhotoPicker
 import com.alexnemyr.happybirthday.ui.common.PickerBottomSheet
 import com.alexnemyr.happybirthday.ui.common.buttonHeight
-import com.alexnemyr.domain.util.formattedDate
 import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore
+import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
-
-data class ErrorViewState(
-    val show: Boolean,
-    val message: String?
-)
 
 @Composable
 fun InputScreen(
     viewModel: InputViewModel,
     navController: NavHostController
 ) {
-
     val showSheet = remember { mutableStateOf(false) }
-    val errorState = remember { mutableStateOf(ErrorViewState(false, "")) }
-
     val mviState = viewModel.states.collectAsState(null).value
+    val viewState: MutableState<InputStore.State?> = remember { mutableStateOf(null) }
 
-    val viewState: MutableState<BirthdayState?> = remember {
-        mutableStateOf(null)
-    }
-
-    val label = viewModel.labels.collectAsState(null).value
-
-    val context = LocalContext.current
-
-    SideEffect {
-        when (label) {
-            is InputStore.Label.NavigateToAnniversary -> {
-                navController.navigate(Screen.AnniversaryBitmapWrapperScreen.name)
+    viewModel.labels
+        .onEach {
+            when (it) {
+                is InputStore.Label.NavigateToAnniversary -> {
+                    Timber.tag(TAG).d("label -> onEach $it")
+                    navController.navigate(Screen.AnniversaryBitmapWrapperScreen.name)
+                }
             }
-
-            else -> {}
         }
-        if (errorState.value.show) {
-            Toast.makeText(context, errorState.value.message ?: "Error ", Toast.LENGTH_LONG)
-                .show()
-        }
-    }
+        .collectAsState(null).value
 
     when (mviState) {
-        is InputStore.State.Data -> {
-            errorState.value = errorState.value.copy(show = false)
-
-            viewState.value = BirthdayState(
-                name = mviState.name,
-                date = mviState.date,
-                uriPath = mviState.uri
-            )
-
-
+        is InputStore.State -> {
+            viewState.value = mviState
         }
 
-        is InputStore.State.Progress -> {
-            errorState.value = errorState.value.copy(show = false)
-            Box(modifier = Modifier.fillMaxSize()) {
-                CircularProgressIndicator(Modifier.align(Alignment.Center))
-            }
-        }
-
-        is InputStore.State.Error -> {
-            errorState.value = errorState.value.copy(show = true, message = mviState.message.message)
-        }
+//        is InputStore.State.Progress -> {
+//            errorState.value = errorState.value.copy(show = false)
+//            Box(modifier = Modifier.fillMaxSize()) {
+//                CircularProgressIndicator(Modifier.align(Alignment.Center))
+//            }
+//        }
+//
+//        is InputStore.State.Error -> {
+//            errorState.value = errorState.value.copy(show = true, message = mviState.message.message)
+//        }
 
         else -> {
-            errorState.value = errorState.value.copy(show = false)
             Timber.tag(TAG).d("mviState is else $mviState")
         }
     }
@@ -134,18 +104,10 @@ fun InputScreen(
                 showSheet = showSheet,
                 state = viewState.value,
                 onEditName = { name ->
-                    viewModel.accept(
-                        InputStore.Intent.Edit(
-                            userState.copy(name = name)
-                        )
-                    )
+                    viewModel.accept(InputStore.Intent.EditName(name = name))
                 },
                 onDateChosen = { date ->
-                    viewModel.accept(
-                        InputStore.Intent.Edit(
-                            userState.copy(date = date)
-                        )
-                    )
+                    viewModel.accept(InputStore.Intent.EditDate(date = date))
                 },
                 navTo = {
                     viewModel.accept(InputStore.Intent.ShowAnniversaryScreen)
@@ -156,7 +118,7 @@ fun InputScreen(
                 showSheet = showSheet.value,
                 onClosePicker = { showSheet.value = false },
                 onSelectPicture = { path ->
-                    viewModel.accept(InputStore.Intent.Edit(userState.copy(uriPath = path)))
+                    viewModel.accept(InputStore.Intent.EditPicture(uri = path))
                 }
             )
         }
@@ -198,7 +160,7 @@ fun PicturePicker(
 fun InputContent(
     innerPadding: PaddingValues,
     showSheet: MutableState<Boolean>,
-    state: BirthdayState?,
+    state: InputStore.State?,
     onEditName: (name: String) -> Unit,
     onDateChosen: (date: String) -> Unit,
     navTo: () -> Unit
@@ -244,8 +206,7 @@ fun InputContent(
                     .height(buttonHeight),
             ) { Text(text = "Picture") }
 
-            state?.let {
-
+            state?.uri?.let {
                 Photo(it, painterResource(id = R.drawable.ic_smile_fox), Modifier)
             }
 
