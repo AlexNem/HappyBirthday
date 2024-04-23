@@ -1,4 +1,6 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class,
+    ExperimentalMaterial3Api::class
+)
 
 package com.alexnemyr.happybirthday.ui.flow.input
 
@@ -28,6 +30,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,85 +55,113 @@ import com.alexnemyr.happybirthday.ui.common.Photo
 import com.alexnemyr.happybirthday.ui.common.PhotoPicker
 import com.alexnemyr.happybirthday.ui.common.PickerBottomSheet
 import com.alexnemyr.happybirthday.ui.common.buttonHeight
+import com.alexnemyr.happybirthday.ui.common.util.formattedDate
 import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore
 import timber.log.Timber
 
+data class ErrorViewState(
+    val show: Boolean,
+    val message: String?
+)
+
 @Composable
 fun InputScreen(
-    mviViewModel: InputMviViewModel,
+    viewModel: InputViewModel,
     navController: NavHostController
 ) {
 
     val showSheet = remember { mutableStateOf(false) }
+    val errorState = remember { mutableStateOf(ErrorViewState(false, "")) }
 
-    val mviState = mviViewModel.states.collectAsState(null).value
+    val mviState = viewModel.states.collectAsState(null).value
 
     val viewState: MutableState<UserState?> = remember {
         mutableStateOf(null)
     }
 
-    Toolbar(content = { innerPadding ->
-        when (mviState) {
-            is InputStore.State.Data -> {
+    val label = viewModel.labels.collectAsState(null).value
 
-                viewState.value = UserState(
-                    name = mviState.name,
-                    date = mviState.date,
-                    uriPath = mviState.uri
-                )
+    val context = LocalContext.current
 
-                InputContent(
-                    innerPadding = innerPadding,
-                    showSheet = showSheet,
-                    state = viewState.value,
-                    onEditName = { name ->
-                        mviViewModel.accept(
-                            InputStore.Intent.Edit(
-                                viewState.value!!.copy(name = name)
-                            )
-                        )
-                    },
-                    onDateChosen = { date ->
-                        mviViewModel.accept(
-                            InputStore.Intent.Edit(
-                                viewState.value!!.copy(date = date)
-                            )
-                        )
-                    },
-                    navTo = {
-                        //todo: Add label
-                        navController.navigate(Screen.AnniversaryBitmapWrapperScreen.name)
-                    }
-                )
-
-                PicturePicker(
-                    showSheet = showSheet.value,
-                    onClosePicker = { showSheet.value = false },
-                    onSelectPicture = { path ->
-                        viewState.value?.let {
-                            mviViewModel.accept(
-                                InputStore.Intent.Edit(it.copy(uriPath = path))
-                            )
-                        }
-                    }
-                )
-
+    SideEffect {
+        when (label) {
+            is InputStore.Label.NavigateToAnniversary -> {
+                navController.navigate(Screen.AnniversaryBitmapWrapperScreen.name)
             }
 
-            is InputStore.State.Progress -> {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    CircularProgressIndicator(Modifier.align(Alignment.Center))
-                }
-            }
+            else -> {}
+        }
+        if (errorState.value.show) {
+            Toast.makeText(context, errorState.value.message ?: "Error ", Toast.LENGTH_LONG)
+                .show()
+        }
+    }
 
-            is InputStore.State.Error -> {
-                Toast.makeText(LocalContext.current, "Error", Toast.LENGTH_LONG).show()
-            }
+    when (mviState) {
+        is InputStore.State.Data -> {
+            errorState.value = errorState.value.copy(show = false)
 
-            else -> {
-                Timber.tag(TAG).d("mviState is else $mviState")
+            viewState.value = UserState(
+                name = mviState.name,
+                date = mviState.date,
+                uriPath = mviState.uri
+            )
+
+
+        }
+
+        is InputStore.State.Progress -> {
+            errorState.value = errorState.value.copy(show = false)
+            Box(modifier = Modifier.fillMaxSize()) {
+                CircularProgressIndicator(Modifier.align(Alignment.Center))
             }
         }
+
+        is InputStore.State.Error -> {
+            errorState.value = errorState.value.copy(show = true, message = mviState.message.message)
+        }
+
+        else -> {
+            errorState.value = errorState.value.copy(show = false)
+            Timber.tag(TAG).d("mviState is else $mviState")
+        }
+    }
+
+    Toolbar(content = { innerPadding ->
+        viewState.value?.let { userState ->
+            InputContent(
+                innerPadding = innerPadding,
+                showSheet = showSheet,
+                state = viewState.value,
+                onEditName = { name ->
+                    viewModel.accept(
+                        InputStore.Intent.Edit(
+                            userState.copy(name = name)
+                        )
+                    )
+                },
+                onDateChosen = { date ->
+                    viewModel.accept(
+                        InputStore.Intent.Edit(
+                            userState.copy(date = date)
+                        )
+                    )
+                },
+                navTo = {
+                    viewModel.accept(InputStore.Intent.ShowAnniversaryScreen)
+                }
+            )
+
+            PicturePicker(
+                showSheet = showSheet.value,
+                onClosePicker = { showSheet.value = false },
+                onSelectPicture = { path ->
+                    viewModel.accept(InputStore.Intent.Edit(userState.copy(uriPath = path)))
+                }
+            )
+        }
+
+
     })
 
 }
@@ -194,7 +225,7 @@ fun InputContent(
             //date
             val showDialog = rememberSaveable { mutableStateOf(false) }
 
-            ClickableText(text = AnnotatedString(text = "date = ${state?.date}"),
+            ClickableText(text = AnnotatedString(text = "date = ${state?.date?.formattedDate}"),
                 style = TextStyle(
                     fontSize = 32.sp, fontWeight = FontWeight.W700
                 ),

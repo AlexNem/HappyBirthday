@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.alexnemyr.happybirthday.ui.flow.ScreenshotWrapper
+import com.alexnemyr.happybirthday.ui.flow.screenshotWrapper
 
 @Composable
 fun AnniversaryBitmapWrapperScreen(
@@ -24,11 +24,12 @@ fun AnniversaryBitmapWrapperScreen(
 ) {
     val context = LocalContext.current
     Box(modifier = Modifier) {
-        val bitmapWrapper = ScreenshotWrapper(
+        val bitmapWrapper = screenshotWrapper(
             content = {
                 AnniversaryScreen(
                     viewModel = viewModel,
-                    onBackNav = { navController.popBackStack() })
+                    navController = navController
+                )
             }
         )
         Button(

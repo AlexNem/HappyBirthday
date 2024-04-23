@@ -4,10 +4,16 @@ import android.net.Uri
 import com.alexnemyr.domain.util.TAG
 import timber.log.Timber
 
+//todo: move to UI layer
 data class UserState(
     val name: String?,
     val date: String?,
     val uriPath: String?,
+)
+
+data class Name(
+    val name: String?,
+    val isError: Boolean?
 )
 
 val String.toUriOrEmpty: Uri

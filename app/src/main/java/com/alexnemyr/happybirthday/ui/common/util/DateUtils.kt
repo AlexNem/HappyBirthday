@@ -1,20 +1,33 @@
 package com.alexnemyr.happybirthday.ui.common.util
 
-import com.alexnemyr.domain.util.TAG
-import timber.log.Timber
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.Period
 import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 
-fun toDate(age: String?): Age {
-    return age?.let {
-        val birthdayCal: Calendar = Calendar.getInstance().apply { time = Date(it) }
+fun toDate(age: String): Age? {
+    val result = runCatching {
+        val birthdayCal: Calendar = Calendar.getInstance().apply {
+            time = Date(age.toLong())
+        }
         val resultAge = birthdayCal.age
-        Timber.tag(TAG).e("\nresultAge = $resultAge")
         resultAge
-    } ?: Age(0, 0)
+    }
+        .onSuccess { return it  }
+        .onFailure { return null }
+    return result.getOrNull()
 }
+
+val String.formattedDate: String
+    get() {
+        runCatching {
+            val time = this.toLongOrNull()
+            val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            return formatter.format(time)
+        }.getOrElse { return this }
+    }
 
 data class Age(
     val year: Int,
@@ -36,4 +49,23 @@ val Calendar.age: Age
                 LocalDate.now()
             ).months
         )
+    }
+
+val Age.yearOrMonthTitle: String
+    get() {
+        return if (this.year == 0) "MONTH"
+        else "YEAR"
+    }
+
+
+val String.age: Age?
+    get() {
+        val result = runCatching {
+            val birthdayCal: Calendar = Calendar.getInstance().apply {
+                time = Date(this@age.toLong())
+            }
+            birthdayCal.age
+        }.onSuccess { return it }
+            .onFailure { return null }
+        return result.getOrNull()
     }

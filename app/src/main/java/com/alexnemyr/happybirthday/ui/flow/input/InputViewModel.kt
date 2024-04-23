@@ -4,7 +4,7 @@ import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore
 import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStoreFactory
 import com.alexnemyr.mvi.MviViewModel
 
-class InputMviViewModel(
+class InputViewModel(
     storeFactory: InputStoreFactory
 ) : MviViewModel<InputStore.Intent, InputStore.State, InputStore.Label, InputStore>(storeFactory.create()) {
 

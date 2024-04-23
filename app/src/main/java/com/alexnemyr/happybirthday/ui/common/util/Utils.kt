@@ -47,19 +47,6 @@ data class AnniversaryResources(
     val btnAddIcon: Int,
 )
 
-
-fun String.getYearOrMonth(age: Age): String =
-    if (age.year == 0) "MONTH"
-    else "YEAR"
-
-val String.age: Age
-    get() {
-        val birthdayCal: Calendar = Calendar.getInstance().apply { time = Date(this@age) }
-        val resultAge = birthdayCal.age
-        Timber.tag(TAG).d("\nresultAge = $resultAge")
-        return resultAge
-    }
-
 data class NumberIcon(
     val number: Int,
     val iconId: Int
