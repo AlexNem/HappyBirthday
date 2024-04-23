@@ -1,6 +1,6 @@
 package com.alexnemyr.happybirthday.ui.flow.anniversary.mvi
 
-import com.alexnemyr.domain.view_state.UserState
+import com.alexnemyr.happybirthday.ui.common.state.BirthdayState
 import com.arkivanov.mvikotlin.core.store.Reducer
 
 class AnniversaryReducer : Reducer<AnniversaryStore.State, AnniversaryStore.Message> {
@@ -11,7 +11,7 @@ class AnniversaryReducer : Reducer<AnniversaryStore.State, AnniversaryStore.Mess
         }
     }
 
-    private fun onUserReceived(user: UserState): AnniversaryStore.State {
+    private fun onUserReceived(user: BirthdayState): AnniversaryStore.State {
         return AnniversaryStore.State.Data(
             user.name,
             user.date,

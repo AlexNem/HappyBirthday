@@ -24,30 +24,22 @@ val viewModelModule = module {
 }
 
 val mviModule = module {
+    factory<StoreFactory> {
+        if (BuildConfig.DEBUG) LoggingStoreFactory(
+            delegate = DefaultStoreFactory(),
+            logFormatter = DefaultLogFormatter()
+        )
+        else DefaultStoreFactory()
+
+    }
     //Input
     single { InputBootstrapper(get()) }
-    single { InputExecutor(get(), get()) }
+    single { InputExecutor(get()) }
     single { InputReducer() }
     single { InputStoreFactory(get(), get(), get(), get()) }
-    factory<StoreFactory> {
-        if (BuildConfig.DEBUG) LoggingStoreFactory(
-            delegate = DefaultStoreFactory(),
-            logFormatter = DefaultLogFormatter()
-        )
-        else DefaultStoreFactory()
-
-    }
     //Anniversary
     single { AnniversaryBootstrapper(get()) }
-    single { AnniversaryExecutor(get(), get()) }
+    single { AnniversaryExecutor(get()) }
     single { AnniversaryReducer() }
     single { AnniversaryStoreFactory(get(), get(), get(), get()) }
-    factory<StoreFactory> {
-        if (BuildConfig.DEBUG) LoggingStoreFactory(
-            delegate = DefaultStoreFactory(),
-            logFormatter = DefaultLogFormatter()
-        )
-        else DefaultStoreFactory()
-
-    }
 }

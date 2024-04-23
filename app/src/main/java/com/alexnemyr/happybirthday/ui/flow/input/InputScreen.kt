@@ -47,7 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.alexnemyr.domain.util.TAG
-import com.alexnemyr.domain.view_state.UserState
+import com.alexnemyr.happybirthday.ui.common.state.BirthdayState
 import com.alexnemyr.happybirthday.R
 import com.alexnemyr.happybirthday.navigation.Screen
 import com.alexnemyr.happybirthday.ui.common.CameraPicker
@@ -55,7 +55,7 @@ import com.alexnemyr.happybirthday.ui.common.Photo
 import com.alexnemyr.happybirthday.ui.common.PhotoPicker
 import com.alexnemyr.happybirthday.ui.common.PickerBottomSheet
 import com.alexnemyr.happybirthday.ui.common.buttonHeight
-import com.alexnemyr.happybirthday.ui.common.util.formattedDate
+import com.alexnemyr.domain.util.formattedDate
 import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore
 import timber.log.Timber
 
@@ -75,7 +75,7 @@ fun InputScreen(
 
     val mviState = viewModel.states.collectAsState(null).value
 
-    val viewState: MutableState<UserState?> = remember {
+    val viewState: MutableState<BirthdayState?> = remember {
         mutableStateOf(null)
     }
 
@@ -101,7 +101,7 @@ fun InputScreen(
         is InputStore.State.Data -> {
             errorState.value = errorState.value.copy(show = false)
 
-            viewState.value = UserState(
+            viewState.value = BirthdayState(
                 name = mviState.name,
                 date = mviState.date,
                 uriPath = mviState.uri
@@ -198,7 +198,7 @@ fun PicturePicker(
 fun InputContent(
     innerPadding: PaddingValues,
     showSheet: MutableState<Boolean>,
-    state: UserState?,
+    state: BirthdayState?,
     onEditName: (name: String) -> Unit,
     onDateChosen: (date: String) -> Unit,
     navTo: () -> Unit

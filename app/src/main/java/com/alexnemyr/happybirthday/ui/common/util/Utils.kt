@@ -1,10 +1,9 @@
 package com.alexnemyr.happybirthday.ui.common.util
 
+import android.net.Uri
 import com.alexnemyr.domain.util.TAG
 import com.alexnemyr.happybirthday.R
 import timber.log.Timber
-import java.util.Calendar
-import java.util.Date
 
 enum class BGType {
     FOX, PELICAN//, ELEPHANT //todo: crash with elephant vector drawable
@@ -66,3 +65,13 @@ data class NumberIcon(
         )
     }
 }
+
+val String.toUriOrEmpty: Uri
+    get() = runCatching {
+        try {
+            Uri.parse(this)
+        } catch (e: Exception) {
+            Timber.tag(TAG).e("toUriOrEmpty -> ${e.message}")
+            throw Exception()
+        }
+    }.getOrElse { Uri.EMPTY }

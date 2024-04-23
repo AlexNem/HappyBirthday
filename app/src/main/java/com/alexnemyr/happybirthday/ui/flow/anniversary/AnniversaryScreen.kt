@@ -40,17 +40,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.alexnemyr.domain.util.Age
 import com.alexnemyr.domain.util.TAG
-import com.alexnemyr.domain.view_state.UserState
+import com.alexnemyr.domain.util.age
+import com.alexnemyr.domain.util.toDate
+import com.alexnemyr.domain.util.yearOrMonthTitle
 import com.alexnemyr.happybirthday.R
 import com.alexnemyr.happybirthday.navigation.Screen
 import com.alexnemyr.happybirthday.ui.common.Photo
-import com.alexnemyr.happybirthday.ui.common.util.Age
+import com.alexnemyr.happybirthday.ui.common.state.BirthdayState
 import com.alexnemyr.happybirthday.ui.common.util.NumberIcon
-import com.alexnemyr.happybirthday.ui.common.util.age
 import com.alexnemyr.happybirthday.ui.common.util.getAnniversaryResources
-import com.alexnemyr.happybirthday.ui.common.util.yearOrMonthTitle
-import com.alexnemyr.happybirthday.ui.common.util.toDate
 import com.alexnemyr.happybirthday.ui.flow.anniversary.mvi.AnniversaryStore
 import com.alexnemyr.happybirthday.ui.flow.input.PicturePicker
 import timber.log.Timber
@@ -65,7 +65,7 @@ fun AnniversaryScreen(
 
     val mviState = viewModel.states.collectAsState(null).value
 
-    val viewState: MutableState<UserState?> = remember {
+    val viewState: MutableState<BirthdayState?> = remember {
         mutableStateOf(null)
     }
 
@@ -81,9 +81,11 @@ fun AnniversaryScreen(
         }
     }
 
+    Timber.tag(TAG).d("mviState -> $mviState")
+
     when (mviState) {
         is AnniversaryStore.State.Data -> {
-            viewState.value = UserState(
+            viewState.value = BirthdayState(
                 name = mviState.name,
                 date = mviState.date,
                 uriPath = mviState.uri
@@ -127,7 +129,7 @@ fun AnniversaryScreen(
 @Composable
 fun AnniversaryContent(
     showSheet: MutableState<Boolean>,
-    state: UserState,
+    state: BirthdayState,
     onBackNav: () -> Unit
 ) {
 

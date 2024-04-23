@@ -1,4 +1,4 @@
-package com.alexnemyr.happybirthday.ui.common.util
+package com.alexnemyr.domain.util
 
 import java.text.SimpleDateFormat
 import java.time.LocalDate
@@ -29,10 +29,7 @@ val String.formattedDate: String
         }.getOrElse { return this }
     }
 
-data class Age(
-    val year: Int,
-    val month: Int
-)
+
 
 val Calendar.age: Age
     get() {

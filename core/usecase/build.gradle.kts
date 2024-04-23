@@ -49,4 +49,6 @@ dependencies {
     implementation(libs.koin.androidx.compose)
     implementation(libs.koin.annotations)
     implementation(libs.koin.ksp.compiler)
+    //logging
+    implementation(libs.timber)
 }

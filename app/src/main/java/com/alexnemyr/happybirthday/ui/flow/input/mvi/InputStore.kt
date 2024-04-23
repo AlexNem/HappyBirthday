@@ -1,17 +1,17 @@
 package com.alexnemyr.happybirthday.ui.flow.input.mvi
 
-import com.alexnemyr.domain.view_state.UserState
+import com.alexnemyr.happybirthday.ui.common.state.BirthdayState
 import com.arkivanov.mvikotlin.core.store.Store
 
 interface InputStore : Store<InputStore.Intent, InputStore.State, InputStore.Label> {
 
     sealed class Action {
-        data class UpdateUser(val user: UserState): Action()
+        data class UpdateUser(val user: BirthdayState): Action()
     }
 
     sealed class Intent {
         data object ShowAnniversaryScreen: Intent()
-        data class Edit(val user: UserState) : Intent()
+        data class Edit(val user: BirthdayState) : Intent()
 //        data class EditName(val name: String) : Intent()
     }
 
@@ -48,6 +48,6 @@ interface InputStore : Store<InputStore.Intent, InputStore.State, InputStore.Lab
     sealed class Message {
         data object Progress : Message()
         data class Error(val e: Throwable) : Message()
-        data class UserData(val result: UserState): Message()
+        data class UserData(val result: BirthdayState): Message()
     }
 }

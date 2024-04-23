@@ -1,6 +1,7 @@
 package com.alexnemyr.repository
 
 import com.alexnemyr.domain.domain.UserDomain
+import com.alexnemyr.domain.util.age
 import com.alexnemyr.storage.AppPreferences
 
 class UserRepositoryImpl(
@@ -10,7 +11,8 @@ class UserRepositoryImpl(
         get() = UserDomain(
             preferences.name,
             preferences.date,
-            preferences.uri
+            preferences.uri,
+            preferences.date?.age
         )
 
     override fun saveUser(user: UserDomain) {

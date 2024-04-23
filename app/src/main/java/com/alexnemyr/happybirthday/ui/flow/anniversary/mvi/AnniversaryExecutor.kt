@@ -1,16 +1,13 @@
 package com.alexnemyr.happybirthday.ui.flow.anniversary.mvi
 
-import com.alexnemyr.domain.mapper.toDomain
-import com.alexnemyr.domain.view_state.UserState
+import com.alexnemyr.happybirthday.ui.common.state.BirthdayState
+import com.alexnemyr.happybirthday.ui.common.state.toDomain
 import com.alexnemyr.mvi.MviExecutor
 import com.alexnemyr.usecase.SaveUserUseCase
-import com.alexnemyr.usecase.UserFlowUseCase
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class AnniversaryExecutor(
-    private val userFlowUseCase: UserFlowUseCase,
     private val saveUserUseCase: SaveUserUseCase
 ) : MviExecutor<AnniversaryStore.Intent, AnniversaryStore.Action, AnniversaryStore.State, AnniversaryStore.Message, AnniversaryStore.Label>() {
 
@@ -35,16 +32,16 @@ class AnniversaryExecutor(
         }
     }
 
-    private fun setUser(user: UserState) {
+    private fun setUser(user: BirthdayState) {
         job?.cancel()
         job = scope.launch {
-            dispatch(AnniversaryStore.Message.Progress)
-            delay(100)
+//            dispatch(AnniversaryStore.Message.Progress)
+//            delay(100)
             dispatch(AnniversaryStore.Message.UserData(user))
         }
     }
 
-    private fun editUser(state: UserState) {
+    private fun editUser(state: BirthdayState) {
         job?.cancel()
         job = scope.launch {
             saveUserUseCase.invoke(user = state.toDomain)
