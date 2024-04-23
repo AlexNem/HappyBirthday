@@ -1,8 +1,6 @@
 package com.alexnemyr.happybirthday.ui.flow.anniversary.mvi
 
-import com.alexnemyr.happybirthday.ui.common.state.BirthdayState
-import com.alexnemyr.happybirthday.ui.common.state.toDomain
-import com.alexnemyr.happybirthday.ui.common.state.toViewState
+import com.alexnemyr.domain.domain.UserDomain
 import com.alexnemyr.mvi.MviExecutor
 import com.alexnemyr.usecase.SaveUserUseCase
 import com.alexnemyr.usecase.UserFlowUseCase
@@ -43,12 +41,12 @@ class AnniversaryExecutor(
         job?.cancel()
         job = scope.launch {
             userFlowUseCase.invoke()
-                .onEach { dispatch(AnniversaryStore.Message.UserData(it.toViewState)) }
+                .onEach { dispatch(AnniversaryStore.Message.UserData(it)) }
                 .launchIn(this)
         }
     }
 
-    private fun setUser(user: BirthdayState) {
+    private fun setUser(user: UserDomain) {
         job?.cancel()
         job = scope.launch {
             dispatch(AnniversaryStore.Message.Progress)
@@ -60,13 +58,9 @@ class AnniversaryExecutor(
     private fun editPicture(uri: String, state: AnniversaryStore.State) {
         job?.cancel()
         job = scope.launch {
-            val userState = BirthdayState(
-                name = state.name,
-                date = state.date,
-                uriPath = uri
-            )
-            saveUserUseCase.invoke(user = userState.toDomain)
-            dispatch(AnniversaryStore.Message.UserData(userState))
+            val newState = state.copy(uri = uri)
+            saveUserUseCase.invoke(user = newState.toDomain)
+            dispatch(AnniversaryStore.Message.UserData(newState.toDomain))
         }
     }
 
@@ -74,3 +68,10 @@ class AnniversaryExecutor(
         publish(AnniversaryStore.Label.NavigateToInput)
     }
 }
+
+val AnniversaryStore.State.toDomain: UserDomain
+    get() = UserDomain(
+        name = this.name,
+        date = this.date,
+        uri = this.uri
+    )

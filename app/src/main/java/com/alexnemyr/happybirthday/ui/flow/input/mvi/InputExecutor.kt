@@ -1,7 +1,6 @@
 package com.alexnemyr.happybirthday.ui.flow.input.mvi
 
-import com.alexnemyr.happybirthday.ui.common.state.BirthdayState
-import com.alexnemyr.happybirthday.ui.common.state.toDomain
+import com.alexnemyr.domain.domain.UserDomain
 import com.alexnemyr.mvi.MviExecutor
 import com.alexnemyr.usecase.SaveUserUseCase
 import kotlinx.coroutines.Job
@@ -29,7 +28,7 @@ class InputExecutor(
         }
     }
 
-    private fun setUser(user: BirthdayState) {
+    private fun setUser(user: UserDomain) {
         job?.cancel()
         job = scope.launch {
             dispatch(InputStore.Message.Progress)
@@ -41,39 +40,27 @@ class InputExecutor(
     private fun editName(name: String, state: InputStore.State) {
         job?.cancel()
         job = scope.launch {
-            val userState = BirthdayState(
-                name = name,
-                date = state.date,
-                uriPath = state.uri
-            )
-            saveUserUseCase.invoke(user = userState.toDomain)
-            dispatch(InputStore.Message.UserData(userState))
+            val newState = state.copy(name = name)
+            saveUserUseCase.invoke(user = newState.toDomain)
+            dispatch(InputStore.Message.UserData(newState.toDomain))
         }
     }
 
     private fun editDate(date: String, state: InputStore.State) {
         job?.cancel()
         job = scope.launch {
-            val userState = BirthdayState(
-                name = state.name,
-                date = date,
-                uriPath = state.uri
-            )
-            saveUserUseCase.invoke(user = userState.toDomain)
-            dispatch(InputStore.Message.UserData(userState))
+            val newState = state.copy(date = date)
+            saveUserUseCase.invoke(user = newState.toDomain)
+            dispatch(InputStore.Message.UserData(newState.toDomain))
         }
     }
 
     private fun editUri(uri: String, state: InputStore.State) {
         job?.cancel()
         job = scope.launch {
-            val userState = BirthdayState(
-                name = state.name,
-                date = state.date,
-                uriPath = uri
-            )
-            saveUserUseCase.invoke(user = userState.toDomain)
-            dispatch(InputStore.Message.UserData(userState))
+            val newState = state.copy(uri = uri)
+            saveUserUseCase.invoke(user = newState.toDomain)
+            dispatch(InputStore.Message.UserData(newState.toDomain))
         }
     }
 
@@ -85,3 +72,10 @@ class InputExecutor(
         }
     }
 }
+
+val InputStore.State.toDomain: UserDomain
+    get() = UserDomain(
+        name = this.name,
+        date = this.date,
+        uri = this.uri
+    )

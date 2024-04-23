@@ -8,7 +8,7 @@ class InputReducer : Reducer<InputStore.State, InputStore.Message> {
             is InputStore.Message.UserData -> copy(
                 name = msg.result.name,
                 date = msg.result.date,
-                uri = msg.result.uriPath,
+                uri = msg.result.uri,
                 isProgress = false,
             )
 

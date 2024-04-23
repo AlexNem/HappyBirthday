@@ -10,7 +10,7 @@ class AnniversaryReducer : Reducer<AnniversaryStore.State, AnniversaryStore.Mess
                 copy(
                     name = msg.result.name,
                     date = msg.result.date,
-                    uri = msg.result.uriPath,
+                    uri = msg.result.uri,
                     isProgress = false
                 )
         }
