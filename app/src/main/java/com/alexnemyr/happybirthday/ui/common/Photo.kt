@@ -16,12 +16,12 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 
 @Composable
-fun Photo(state: BirthdayState, painter: Painter, modifier: Modifier) {
+fun Photo(uriPath: String?, painter: Painter, modifier: Modifier) {
     Box(modifier) {
-        if (state.capturedImageUri.value.path?.isNotEmpty() == true) {
+        if (uriPath.isNullOrBlank()) {
             val request =
                 ImageRequest.Builder(LocalContext.current)
-                    .data(state.capturedImageUri.value)
+                    .data(uriPath)
                     .allowHardware(false)
                     .build()
             AsyncImage(

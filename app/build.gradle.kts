@@ -9,10 +9,10 @@ android {
 
     defaultConfig {
         applicationId = "com.alexnemyr.happybirthday"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
-        versionCode = 6
-        versionName = "0.5"
+        versionCode = 8
+        versionName = "0.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -56,6 +56,10 @@ android {
 
 dependencies {
 
+    implementation(project(":core:domain"))
+    implementation(project(":core:usecase"))
+    implementation(project(":core:mvi"))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -71,8 +75,9 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
+    //logging
     implementation(libs.timber)
+    //coil
     implementation(libs.coil.compose)
     //MVI Kotlin
     implementation(libs.mvikotlin)
@@ -86,6 +91,10 @@ dependencies {
     implementation(libs.koin.androidx.compose)
     implementation(libs.koin.annotations)
     implementation(libs.koin.ksp.compiler)
+    //navigation
+    implementation(libs.androidx.navigation.compose)
 
-    implementation(project(":core:repository"))
+
+
+
 }

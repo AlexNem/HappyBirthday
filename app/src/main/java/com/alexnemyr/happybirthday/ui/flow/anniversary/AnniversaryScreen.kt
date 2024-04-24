@@ -20,7 +20,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -34,90 +36,98 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import com.alexnemyr.domain.util.Age
+import com.alexnemyr.domain.util.TAG
+import com.alexnemyr.domain.util.age
+import com.alexnemyr.domain.util.toDate
+import com.alexnemyr.domain.util.yearOrMonthTitle
 import com.alexnemyr.happybirthday.R
-import com.alexnemyr.happybirthday.BirthdayViewModel
-import com.alexnemyr.happybirthday.ui.common.Age
-import com.alexnemyr.happybirthday.ui.common.AnniversaryRes
-import com.alexnemyr.happybirthday.ui.common.BGType
-import com.alexnemyr.happybirthday.ui.common.BirthdayState
-import com.alexnemyr.happybirthday.ui.common.CameraPicker
-import com.alexnemyr.happybirthday.ui.common.NumberIcon
+import com.alexnemyr.happybirthday.navigation.Screen
 import com.alexnemyr.happybirthday.ui.common.Photo
-import com.alexnemyr.happybirthday.ui.common.PhotoPicker
-import com.alexnemyr.happybirthday.ui.common.PickerBottomSheet
-import com.alexnemyr.happybirthday.ui.common.age
-import com.alexnemyr.happybirthday.ui.common.getYearOrMonth
+import com.alexnemyr.happybirthday.ui.common.util.NumberIcon
+import com.alexnemyr.happybirthday.ui.common.util.getAnniversaryResources
+import com.alexnemyr.happybirthday.ui.flow.anniversary.mvi.AnniversaryStore.Intent
+import com.alexnemyr.happybirthday.ui.flow.anniversary.mvi.AnniversaryStore.Label
+import com.alexnemyr.happybirthday.ui.flow.anniversary.mvi.AnniversaryStore.State
+import com.alexnemyr.happybirthday.ui.flow.input.PicturePicker
+import kotlinx.coroutines.flow.onEach
+import timber.log.Timber
+
 
 @Composable
 fun AnniversaryScreen(
-    viewModel: BirthdayViewModel
+    viewModel: AnniversaryViewModel,
+    navController: NavHostController,
 ) {
 
+    val mviState = viewModel.states.collectAsState(null).value
     val showSheet = remember { mutableStateOf(false) }
+    val viewState: MutableState<State?> = remember { mutableStateOf(null) }
 
-    val capturedImageUri = remember { viewModel.mutableState.value.capturedImageUri }
-    val name = remember { viewModel.mutableState.value.name }
-    val date = remember { viewModel.mutableState.value.date }
 
-    if (showSheet.value) {
-        PickerBottomSheet(onDismiss = { showSheet.value = false }, content = {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.padding(vertical = 32.dp)
-            ) {
-                PhotoPicker(onSelect = { uri ->
-                    capturedImageUri.value = uri
-                    showSheet.value = false
-                })
-                CameraPicker(onSelect = { uri ->
-                    capturedImageUri.value = uri
-                    showSheet.value = false
-                })
-            }
-        })
+    LaunchedEffect(key1 = mviState) {
+        viewModel.accept(Intent.FetchUser)
     }
 
+    viewModel.labels.onEach {
+        Timber.tag(TAG).d("label -> onEach $it")
+        when (it) {
+            is Label.NavigateToInput -> {
+                navController.navigate(Screen.InputScreen.name)
+            }
+        }
+    }.collectAsState(initial = null)
 
-    Anniversary(
-        showSheet,
-        BirthdayState(capturedImageUri, name, date),
-        viewModel,
-    )
+    when (mviState) {
+        is State -> {
+            viewState.value = mviState
+            viewState.value?.let { state ->
+                AnniversaryContent(
+                    showSheet = showSheet,
+                    state = state,
+                    onBackNav = { viewModel.accept(Intent.ShowInputScreen) }
+                )
+                PicturePicker(
+                    showSheet = showSheet.value,
+                    onClosePicker = { showSheet.value = false },
+                    onSelectPicture = { path ->
+                        viewModel.accept(Intent.EditPicture(uri = path))
+                    }
+                )
+            }
+
+        }
+
+//        is AnniversaryStore.State.Progress -> {
+//            Box(modifier = Modifier.fillMaxSize()) {
+//                CircularProgressIndicator(Modifier.align(Alignment.Center))
+//            }
+//        }
+//
+//        is AnniversaryStore.State.Error -> {
+//            Toast.makeText(LocalContext.current, "Error", Toast.LENGTH_LONG).show()
+//        }
+
+        else -> {
+            Timber.tag(TAG).d("mviState is else $mviState")
+        }
+    }
 
 }
 
 @Composable
-fun Anniversary(
+fun AnniversaryContent(
     showSheet: MutableState<Boolean>,
-    state: BirthdayState,
-    viewModel: BirthdayViewModel,
+    state: State,
+    onBackNav: () -> Unit
 ) {
 
-    val bgList = listOf(BGType.FOX, BGType.PELICAN)
-    val bg: AnniversaryRes = when (bgList.random()) {
-        BGType.FOX -> AnniversaryRes(
-            color = colorResource(id = R.color.bg_fox),
-            painter = painterResource(id = R.drawable.bg_fox),
-            bntColor = colorResource(id = R.color.btn_fox),
-            bntBGColor = colorResource(id = R.color.btn_bg_fox),
-            bntIcon = painterResource(id = R.drawable.ic_smile_fox),
-            bntAddIcon = painterResource(id = R.drawable.ic_add_fox),
-        )
-
-        BGType.PELICAN -> AnniversaryRes(
-            color = colorResource(id = R.color.bg_pelican),
-            painter = painterResource(id = R.drawable.bg_pelican),
-            bntColor = colorResource(id = R.color.btn_pelican),
-            bntBGColor = colorResource(id = R.color.btn_bg_pelican),
-            bntIcon = painterResource(id = R.drawable.ic_smile_pelican),
-            bntAddIcon = painterResource(id = R.drawable.ic_add_pelican),
-        )
-    }
+    val bg = remember { mutableStateOf(getAnniversaryResources()) }.value
 
     Box(
         modifier = Modifier
-            .background(bg.color)
+            .background(colorResource(id = bg.backgroundColor))
             .fillMaxSize()
     ) {
 
@@ -125,7 +135,8 @@ fun Anniversary(
             modifier = Modifier
                 .padding(16.dp)
                 .align(Alignment.TopStart),
-            onClick = { viewModel.navTo(true) }) {
+            onClick = onBackNav
+        ) {
             Icon(painterResource(id = R.drawable.ic_navigate), contentDescription = null)
         }
 
@@ -143,11 +154,14 @@ fun Anniversary(
             ) {
                 Box(
                     modifier = Modifier
-                        .border(BorderStroke(8.dp, bg.bntColor), shape = CircleShape)
-                        .background(bg.bntBGColor, CircleShape)
+                        .border(
+                            border = BorderStroke(8.dp, colorResource(id = bg.btnColor)),
+                            shape = CircleShape
+                        )
+                        .background(colorResource(id = bg.btnBGColor), CircleShape)
                         .size(300.dp)
                 )
-                Photo(state, bg.bntIcon, Modifier.align(Alignment.Center))
+                Photo(state.uri, painterResource(id = bg.btnIcon), Modifier.align(Alignment.Center))
 
                 val padding = 20.dp
                 IconButton(
@@ -160,7 +174,7 @@ fun Anniversary(
                     Image(
                         modifier = Modifier
                             .size(54.dp),
-                        painter = bg.bntAddIcon,
+                        painter = painterResource(id = bg.btnAddIcon),
                         contentDescription = null,
                         contentScale = ContentScale.Crop
                     )
@@ -174,7 +188,7 @@ fun Anniversary(
             modifier = Modifier
                 .fillMaxSize()
                 .paint(
-                    painter = bg.painter,
+                    painter = painterResource(id = bg.backgroundDrawable),
                     contentScale = ContentScale.FillBounds
                 )
 
@@ -185,7 +199,7 @@ fun Anniversary(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(56.dp))
-                val name = state.name.value.uppercase()
+                val name = state.name?.uppercase()
                 Text(
                     text = "TODAY $name IS",
                     style = TextStyle(
@@ -198,31 +212,13 @@ fun Anniversary(
                         .height(60.dp)
                 )
                 Spacer(modifier = Modifier.height(13.dp))
-                Row(
-                    modifier = Modifier,
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Image(
-                        modifier = Modifier
-                            .wrapContentHeight(),
-                        painter = painterResource(id = R.drawable.left_swirls),
-                        contentScale = ContentScale.Crop,
-                        contentDescription = null
-                    )
-                    Spacer(modifier = Modifier.width(22.dp))
-                    Numbers(age = viewModel.toDate(state.date.value))
-                    Spacer(modifier = Modifier.width(22.dp))
-                    Image(
-                        modifier = Modifier
-                            .wrapContentHeight(),
-                        painter = painterResource(id = R.drawable.right_swirls),
-                        contentScale = ContentScale.Crop,
-                        contentDescription = null
-                    )
-                }
+                AgeComponent(state.date)
                 Spacer(modifier = Modifier.height(14.dp))
-                val subTitle = state.date.value.getYearOrMonth(state.date.value.age)
+
+                var subTitle = ""
+                state.date?.age?.let {
+                    subTitle = it.yearOrMonthTitle
+                }
                 Text(
                     text = "$subTitle OLD ",
                     style = TextStyle(
@@ -235,32 +231,63 @@ fun Anniversary(
     }
 }
 
-
 @Composable
-fun Numbers(age: Age) {
-    if (age.year == 0) {
-        age.month.toString().forEach { ageInt ->
-            val numberList = NumberIcon.list.find { it.number == ageInt.digitToInt() }
+fun AgeComponent(date: String?) {
+    date?.let {
+        Row(
+            modifier = Modifier,
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
             Image(
                 modifier = Modifier
-                    .height(100.dp),
-                painter = painterResource(id = numberList?.iconId ?: R.drawable.number_zero),
+                    .wrapContentHeight(),
+                painter = painterResource(id = R.drawable.left_swirls),
                 contentScale = ContentScale.Crop,
                 contentDescription = null
             )
-        }
-    } else {
-        age.year.toString().forEach { ageInt ->
-            val numberList = NumberIcon.list.find { it.number == ageInt.digitToInt() }
+            Spacer(modifier = Modifier.width(22.dp))
+            Numbers(age = toDate(it))
+            Spacer(modifier = Modifier.width(22.dp))
             Image(
                 modifier = Modifier
-                    .height(100.dp),
-                painter = painterResource(id = numberList?.iconId ?: R.drawable.number_zero),
+                    .wrapContentHeight(),
+                painter = painterResource(id = R.drawable.right_swirls),
                 contentScale = ContentScale.Crop,
                 contentDescription = null
             )
         }
     }
 
+}
+
+
+@Composable
+fun Numbers(age: Age?) {
+    age?.let {
+        if (age.year == 0) {
+            age.month.toString().forEach { ageInt ->
+                val numberList = NumberIcon.list.find { it.number == ageInt.digitToInt() }
+                Image(
+                    modifier = Modifier
+                        .height(100.dp),
+                    painter = painterResource(id = numberList?.iconId ?: R.drawable.number_zero),
+                    contentScale = ContentScale.Crop,
+                    contentDescription = null
+                )
+            }
+        } else {
+            age.year.toString().forEach { ageInt ->
+                val numberList = NumberIcon.list.find { it.number == ageInt.digitToInt() }
+                Image(
+                    modifier = Modifier
+                        .height(100.dp),
+                    painter = painterResource(id = numberList?.iconId ?: R.drawable.number_zero),
+                    contentScale = ContentScale.Crop,
+                    contentDescription = null
+                )
+            }
+        }
+    }
 }
 

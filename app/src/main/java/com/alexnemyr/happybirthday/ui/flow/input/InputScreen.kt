@@ -1,4 +1,7 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
+@file:OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class,
+    ExperimentalMaterial3Api::class
+)
 
 package com.alexnemyr.happybirthday.ui.flow.input
 
@@ -26,7 +29,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,80 +42,129 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.alexnemyr.happybirthday.BirthdayViewModel
+import androidx.navigation.NavHostController
+import com.alexnemyr.domain.util.TAG
+import com.alexnemyr.domain.util.formattedDate
 import com.alexnemyr.happybirthday.R
-import com.alexnemyr.happybirthday.TAG
-import com.alexnemyr.happybirthday.ui.common.BirthdayState
+import com.alexnemyr.happybirthday.navigation.Screen
 import com.alexnemyr.happybirthday.ui.common.CameraPicker
 import com.alexnemyr.happybirthday.ui.common.Photo
 import com.alexnemyr.happybirthday.ui.common.PhotoPicker
 import com.alexnemyr.happybirthday.ui.common.PickerBottomSheet
 import com.alexnemyr.happybirthday.ui.common.buttonHeight
+import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore.Intent
+import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore.Label
+import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore.State
+import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
 
 @Composable
 fun InputScreen(
-    mviViewModel: BirthdayViewModel
+    viewModel: InputViewModel,
+    navController: NavHostController
 ) {
-
-    val state = mviViewModel.state.collectAsState()
-
     val showSheet = remember { mutableStateOf(false) }
+    val mviState = viewModel.states.collectAsState(null).value
+    val viewState: MutableState<State?> = remember { mutableStateOf(null) }
 
-    val capturedImageUri = remember { mviViewModel.mutableState.value.capturedImageUri }
-    val name = remember { mviViewModel.mutableState.value.name }
-    val date = remember { mviViewModel.mutableState.value.date }
-
-    SideEffect {
-        mviViewModel.saveInfo(
-            state.value.name.value,
-            state.value.date.value.toString(),
-            state.value.capturedImageUri.value.toString(),
-        )
-    }
-
-    Timber.tag(TAG).e(
-        "InputPreview -> " +
-                "\nname = ${name.value}" +
-                "\ndate = ${date.value}" +
-                "\ncapturedImageUri = ${capturedImageUri.value}" +
-                "\nstate = ${state.value}"
-    )
-
-    if (showSheet.value) {
-        PickerBottomSheet(onDismiss = { showSheet.value = false }, content = {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.padding(vertical = 32.dp)
-            ) {
-                PhotoPicker(onSelect = { uri ->
-                    capturedImageUri.value = uri
-                    showSheet.value = false
-                })
-                CameraPicker(onSelect = { uri ->
-                    capturedImageUri.value = uri
-                    showSheet.value = false
-                })
+    viewModel.labels
+        .onEach {
+            when (it) {
+                is Label.NavigateToAnniversary -> {
+                    Timber.tag(TAG).d("label -> onEach $it")
+                    navController.navigate(Screen.AnniversaryBitmapWrapperScreen.name)
+                }
             }
-        })
+        }
+        .collectAsState(null).value
+
+    when (mviState) {
+        is State -> {
+            viewState.value = mviState
+        }
+
+//        is InputStore.State.Progress -> {
+//            errorState.value = errorState.value.copy(show = false)
+//            Box(modifier = Modifier.fillMaxSize()) {
+//                CircularProgressIndicator(Modifier.align(Alignment.Center))
+//            }
+//        }
+//
+//        is InputStore.State.Error -> {
+//            errorState.value = errorState.value.copy(show = true, message = mviState.message.message)
+//        }
+
+        else -> {
+            Timber.tag(TAG).d("mviState is else $mviState")
+        }
     }
 
-    Toolbar { innerPadding ->
-        InputDetails(
-            innerPadding,
-            showSheet,
-            BirthdayState(capturedImageUri, name, date),
-            navTo = { mviViewModel.navTo(false) }
-        )
+    Toolbar(content = { innerPadding ->
+        viewState.value?.let { userState ->
+            InputContent(
+                innerPadding = innerPadding,
+                showSheet = showSheet,
+                state = viewState.value,
+                onEditName = { name ->
+                    viewModel.accept(Intent.EditName(name = name))
+                },
+                onDateChosen = { date ->
+                    viewModel.accept(Intent.EditDate(date = date))
+                },
+                navTo = {
+                    viewModel.accept(Intent.ShowAnniversaryScreen)
+                }
+            )
+
+            PicturePicker(
+                showSheet = showSheet.value,
+                onClosePicker = { showSheet.value = false },
+                onSelectPicture = { path ->
+                    viewModel.accept(Intent.EditPicture(uri = path))
+                }
+            )
+        }
+
+
+    })
+
+}
+
+@Composable
+fun PicturePicker(
+    showSheet: Boolean,
+    onClosePicker: () -> Unit,
+    onSelectPicture: (path: String) -> Unit
+) {
+    if (showSheet) {
+        PickerBottomSheet(
+            onDismiss = onClosePicker,
+            content = {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.padding(vertical = 32.dp)
+                ) {
+                    PhotoPicker(onSelect = { uri ->
+                        uri.encodedPath?.let { onSelectPicture(it) }
+                        onClosePicker()
+                    })
+                    CameraPicker(onSelect = { uri ->
+                        uri.encodedPath?.let { onSelectPicture(it) }
+                        onClosePicker()
+                    })
+                }
+            })
     }
 }
 
 @Composable
-fun InputDetails(
+fun InputContent(
     innerPadding: PaddingValues,
     showSheet: MutableState<Boolean>,
-    state: BirthdayState,
+    state: State?,
+    onEditName: (name: String) -> Unit,
+    onDateChosen: (date: String) -> Unit,
     navTo: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -129,21 +180,16 @@ fun InputDetails(
             val label = "Name"
 
             OutlinedTextField(
-                value = state.name.value,
-                onValueChange = { state.name.value = it },
+                value = state?.name ?: "",
+                onValueChange = { onEditName(it) },
                 label = { Text(label) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
             //date
             val showDialog = rememberSaveable { mutableStateOf(false) }
-            val onOk: (date: Long?) -> Unit = {
-                it?.let {
-                    state.date.value = it
-                }
-            }
 
-            ClickableText(text = AnnotatedString(text = "date = ${state.date.value}"),
+            ClickableText(text = AnnotatedString(text = "date = ${state?.date?.formattedDate}"),
                 style = TextStyle(
                     fontSize = 32.sp, fontWeight = FontWeight.W700
                 ),
@@ -151,7 +197,7 @@ fun InputDetails(
                     showDialog.value = true
                 })
             Date(
-                onOk = { date -> onOk(date) },
+                onOk = { date -> onDateChosen(date.toString()) },
                 showDialog = showDialog
             )
             //picture
@@ -162,11 +208,13 @@ fun InputDetails(
                     .height(buttonHeight),
             ) { Text(text = "Picture") }
 
-            Photo(state, painterResource(id = R.drawable.ic_smile_fox), Modifier)
+            state?.uri?.let {
+                Photo(it, painterResource(id = R.drawable.ic_smile_fox), Modifier)
+            }
 
         }
         //next
-        if (state.name.value.isNotBlank() && state.date.value != 0L) {
+        if (state?.name?.isNotBlank() == true && state.date != "0") {
             Column(
                 modifier = Modifier.align(Alignment.BottomCenter)
             ) {

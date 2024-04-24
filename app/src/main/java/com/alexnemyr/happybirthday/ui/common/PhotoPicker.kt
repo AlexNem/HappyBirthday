@@ -14,6 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.alexnemyr.domain.util.TAG
+import timber.log.Timber
 
 @Composable
 fun PhotoPicker(
@@ -23,7 +25,10 @@ fun PhotoPicker(
 
     val singlePhotoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri -> onSelect(uri ?: Uri.EMPTY) }
+        onResult = { uri ->
+            Timber.tag(TAG).d("PhotoPicker -> uri = $uri")
+            onSelect(uri ?: Uri.EMPTY)
+        }
     )
 
     fun launchPhotoPicker() {

@@ -11,7 +11,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.drawToBitmap
 
 @Composable
-fun ScreenshotWrapper(content : @Composable () -> Unit): () -> Bitmap {
+fun screenshotWrapper(content : @Composable () -> Unit): () -> Bitmap {
         val context = LocalContext.current
         val composeView = remember { ComposeView(context = context) }
         fun captureBitmap(): Bitmap = composeView.drawToBitmap()
