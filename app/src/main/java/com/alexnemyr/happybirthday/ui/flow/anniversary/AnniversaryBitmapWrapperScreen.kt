@@ -16,6 +16,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.alexnemyr.happybirthday.ui.flow.screenshotWrapper
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun AnniversaryBitmapWrapperScreen(
@@ -48,8 +51,9 @@ fun AnniversaryBitmapWrapperScreen(
 }
 
 private fun share(bitmap: Bitmap, context: Context) {
+    val timeStamp = SimpleDateFormat("yyyy-MM-dd_HHmmss", Locale.getDefault()).format(Date())
     val bitmapPath: String =
-        MediaStore.Images.Media.insertImage(context.contentResolver, bitmap, "title", null)
+        MediaStore.Images.Media.insertImage(context.contentResolver, bitmap, timeStamp, null)
     val bitmapUri = Uri.parse(bitmapPath)
 
     val intent = Intent(Intent.ACTION_SEND)

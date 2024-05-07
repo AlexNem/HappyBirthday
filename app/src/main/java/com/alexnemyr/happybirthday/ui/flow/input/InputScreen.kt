@@ -5,6 +5,7 @@
 
 package com.alexnemyr.happybirthday.ui.flow.input
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,9 +33,11 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -52,10 +55,14 @@ import com.alexnemyr.happybirthday.ui.common.Photo
 import com.alexnemyr.happybirthday.ui.common.PhotoPicker
 import com.alexnemyr.happybirthday.ui.common.PickerBottomSheet
 import com.alexnemyr.happybirthday.ui.common.buttonHeight
+import com.alexnemyr.happybirthday.ui.common.util.fileFromContentUri
+import com.alexnemyr.happybirthday.ui.common.util.getMediaFile
 import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore.Intent
 import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore.Label
 import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore.State
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @Composable
@@ -113,14 +120,31 @@ fun InputScreen(
                 },
                 navTo = {
                     viewModel.accept(Intent.ShowAnniversaryScreen)
-                }
+                },
             )
+
+            val context = LocalContext.current
+            val scope = rememberCoroutineScope()
+            val onDo: (uri: Uri) -> Unit = { uri ->
+                scope.launch {
+                    delay(2000)
+                    val getMediaFile = getMediaFile(context, uri)
+                    Timber.tag(TAG).e("CameraPicker -> getFileName = ${getMediaFile}")
+
+                }
+            }
+
 
             PicturePicker(
                 showSheet = showSheet.value,
                 onClosePicker = { showSheet.value = false },
                 onSelectPicture = { path ->
                     viewModel.accept(Intent.EditPicture(uri = path))
+                },
+                onSelectUri = { uri ->
+                    Timber.tag(TAG).d("onSelectUri -> $uri")
+                    onDo(uri)
+                    viewModel.accept(Intent.EditPicture(uri = uri.toString()))
                 }
             )
         }
@@ -134,8 +158,10 @@ fun InputScreen(
 fun PicturePicker(
     showSheet: Boolean,
     onClosePicker: () -> Unit,
-    onSelectPicture: (path: String) -> Unit
+    onSelectPicture: (path: String) -> Unit,
+    onSelectUri: (uri: Uri) -> Unit
 ) {
+    val context = LocalContext.current
     if (showSheet) {
         PickerBottomSheet(
             onDismiss = onClosePicker,
@@ -146,11 +172,19 @@ fun PicturePicker(
                     modifier = Modifier.padding(vertical = 32.dp)
                 ) {
                     PhotoPicker(onSelect = { uri ->
-                        uri.encodedPath?.let { onSelectPicture(it) }
+                        Timber.tag(TAG).e("PhotoPicker -> uri = ${uri}")
+                        val absolutePath = fileFromContentUri(context, uri).absolutePath
+                        Timber.tag(TAG).e("PhotoPicker -> getImages = ${absolutePath}")
+                        val getMediaFile = getMediaFile(context, uri)
+                        Timber.tag(TAG).e("PhotoPicker -> getFileName = ${getMediaFile}")
+
+                        onSelectUri(uri)
+                        onSelectPicture(uri.path ?: "")
                         onClosePicker()
                     })
                     CameraPicker(onSelect = { uri ->
                         uri.encodedPath?.let { onSelectPicture(it) }
+                        onSelectUri(uri)
                         onClosePicker()
                     })
                 }
@@ -165,7 +199,7 @@ fun InputContent(
     state: State?,
     onEditName: (name: String) -> Unit,
     onDateChosen: (date: String) -> Unit,
-    navTo: () -> Unit
+    navTo: () -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -209,8 +243,8 @@ fun InputContent(
             ) { Text(text = "Picture") }
 
             state?.uri?.let {
-                Photo(it, painterResource(id = R.drawable.ic_smile_fox), Modifier)
             }
+            Photo(state?.uri, painterResource(id = R.drawable.ic_smile_fox), Modifier)
 
         }
         //next

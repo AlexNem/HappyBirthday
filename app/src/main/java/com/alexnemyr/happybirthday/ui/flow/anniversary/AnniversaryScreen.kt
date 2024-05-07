@@ -93,7 +93,8 @@ fun AnniversaryScreen(
                     onClosePicker = { showSheet.value = false },
                     onSelectPicture = { path ->
                         viewModel.accept(Intent.EditPicture(uri = path))
-                    }
+                    },
+                    onSelectUri = {  }
                 )
             }
 

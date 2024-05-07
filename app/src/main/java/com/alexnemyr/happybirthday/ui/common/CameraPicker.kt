@@ -95,6 +95,7 @@ fun CameraPicker(
     }
 }
 
+//todo: save to external storage
 fun Context.createImageFile(): File {
     val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
     val imageFileName = "JPEG_" + timeStamp + "_"
