@@ -21,4 +21,8 @@ dependencyResolutionManagement {
 
 rootProject.name = "HappyBirthday"
 include(":app")
- 
+include(":core:repository")
+include(":core:storage")
+include(":core:usecase")
+include(":core:mvi")
+include(":core:domain")

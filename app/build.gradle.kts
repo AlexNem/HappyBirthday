@@ -9,10 +9,10 @@ android {
 
     defaultConfig {
         applicationId = "com.alexnemyr.happybirthday"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
-        versionCode = 2
-        versionName = "0.1"
+        versionCode = 8
+        versionName = "0.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -45,7 +45,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.14"
     }
     packaging {
         resources {
@@ -56,9 +56,14 @@ android {
 
 dependencies {
 
+    implementation(project(":core:domain"))
+    implementation(project(":core:usecase"))
+    implementation(project(":core:mvi"))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.activity.ktx)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
@@ -71,7 +76,29 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
+    //logging
     implementation(libs.timber)
+    //coil
     implementation(libs.coil.compose)
+    //MVI Kotlin
+    implementation(libs.mvikotlin)
+    implementation(libs.mvikotlin.main)
+    implementation(libs.mvikotlin.logging)
+    implementation(libs.mvikotlin.timetravel)
+    implementation(libs.mvikotlin.extensions.coroutines)
+    //DI
+    implementation(libs.koin.core)
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
+    implementation(libs.koin.annotations)
+    implementation(libs.koin.ksp.compiler)
+    //navigation
+    implementation(libs.androidx.navigation.compose)
+
+    //todo: may not useful
+    implementation (libs.accompanist.permissions)
+
+
+
+
 }

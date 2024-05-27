@@ -3,36 +3,19 @@ package com.alexnemyr.happybirthday
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.alexnemyr.happybirthday.ui.input.InputScreen
+import com.alexnemyr.happybirthday.navigation.BirthdayNavHost
+import com.alexnemyr.happybirthday.ui.common.util.Permission
 import com.alexnemyr.happybirthday.ui.theme.HappyBirthdayTheme
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             HappyBirthdayTheme {
-                InputScreen()
+                BirthdayNavHost()
+                Permission()
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    HappyBirthdayTheme {
-        Greeting("Android")
     }
 }
