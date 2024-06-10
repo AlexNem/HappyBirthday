@@ -1,7 +1,4 @@
-@file:OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class,
-    ExperimentalMaterial3Api::class
-)
+@file:OptIn(ExperimentalMaterial3Api::class)
 
 package com.alexnemyr.happybirthday.ui.flow.input
 
@@ -29,12 +26,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -45,8 +42,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.alexnemyr.domain.util.TAG
 import com.alexnemyr.domain.util.formattedDate
 import com.alexnemyr.happybirthday.R
 import com.alexnemyr.happybirthday.navigation.Screen
@@ -57,149 +54,117 @@ import com.alexnemyr.happybirthday.ui.common.PickerBottomSheet
 import com.alexnemyr.happybirthday.ui.common.buttonHeight
 import com.alexnemyr.happybirthday.ui.common.util.fileFromContentUri
 import com.alexnemyr.happybirthday.ui.common.util.getMediaFile
+import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore
 import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore.Intent
 import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore.Label
-import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore.State
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 import timber.log.Timber
 
 @Composable
 fun InputScreen(
-    viewModel: InputViewModel,
+    inputViewModel: InputViewModel = koinViewModel(),
     navController: NavHostController
 ) {
-    val showSheet = remember { mutableStateOf(false) }
-    val mviState = viewModel.states.collectAsState(null).value
-    val viewState: MutableState<State?> = remember { mutableStateOf(null) }
+    var showPhotoPicker by rememberSaveable { mutableStateOf(false) }
+    val mviState by inputViewModel.states.collectAsStateWithLifecycle()
 
-    viewModel.labels
+    inputViewModel.labels
         .onEach {
             when (it) {
                 is Label.NavigateToAnniversary -> {
-                    Timber.tag(TAG).d("label -> onEach $it")
+                    Timber.d("label -> onEach $it")
                     navController.navigate(Screen.AnniversaryBitmapWrapperScreen.name)
                 }
             }
         }
-        .collectAsState(null).value
+        .collectAsState(null)
 
-    when (mviState) {
-        is State -> {
-            viewState.value = mviState
-        }
-
-//        is InputStore.State.Progress -> {
-//            errorState.value = errorState.value.copy(show = false)
-//            Box(modifier = Modifier.fillMaxSize()) {
-//                CircularProgressIndicator(Modifier.align(Alignment.Center))
-//            }
-//        }
-//
-//        is InputStore.State.Error -> {
-//            errorState.value = errorState.value.copy(show = true, message = mviState.message.message)
-//        }
-
-        else -> {
-            Timber.tag(TAG).d("mviState is else $mviState")
-        }
-    }
-
-    Toolbar(content = { innerPadding ->
-        viewState.value?.let { userState ->
+    Toolbar(
+        content = { innerPadding ->
             InputContent(
                 innerPadding = innerPadding,
-                showSheet = showSheet,
-                state = viewState.value,
-                onEditName = { name ->
-                    viewModel.accept(Intent.EditName(name = name))
-                },
-                onDateChosen = { date ->
-                    viewModel.accept(Intent.EditDate(date = date))
-                },
-                navTo = {
-                    viewModel.accept(Intent.ShowAnniversaryScreen)
-                },
+                state = mviState,
+                onAction = { inputViewModel.accept(it) },
+                showPhotoPicker = { showPhotoPicker = true }
             )
-
             val context = LocalContext.current
             val scope = rememberCoroutineScope()
-            val onDo: (uri: Uri) -> Unit = { uri ->
+            val processUri: (uri: Uri) -> Unit = { uri ->
                 scope.launch {
-                    delay(2000)
-                    val getMediaFile = getMediaFile(context, uri)
-                    Timber.tag(TAG).e("CameraPicker -> getFileName = ${getMediaFile}")
+                    delay(2000) // why delay?
 
+                    // All Media.kt file functions should be distributed among viewmodels/repos/datasources OR some other factory classes.
+                    // rememberCoroutineScope together with getMediaFile() will be canceled if current composable leaves composition.
+                    val getMediaFile = getMediaFile(context, uri)
+                    Timber.e("CameraPicker -> getFileName = $getMediaFile")
                 }
             }
 
-
-            PicturePicker(
-                showSheet = showSheet.value,
-                onClosePicker = { showSheet.value = false },
-                onSelectPicture = { path ->
-                    viewModel.accept(Intent.EditPicture(uri = path))
-                },
-                onSelectUri = { uri ->
-                    Timber.tag(TAG).d("onSelectUri -> $uri")
-                    onDo(uri)
-                    viewModel.accept(Intent.EditPicture(uri = uri.toString()))
-                }
-            )
+            if (showPhotoPicker) {
+                PicturePicker(
+                    // Should be handled via intents too
+                    onClosePicker = { showPhotoPicker = false },
+                    onSelectPicture = { path ->
+                        inputViewModel.accept(Intent.EditPicture(uri = path))
+                    },
+                    onSelectUri = { uri ->
+                        Timber.d("onSelectUri -> $uri")
+                        processUri(uri)
+                        inputViewModel.accept(Intent.EditPicture(uri = uri.toString()))
+                    }
+                )
+            }
         }
-
-
-    })
-
+    )
 }
 
 @Composable
 fun PicturePicker(
-    showSheet: Boolean,
+    // These 3 callbacks can be united
     onClosePicker: () -> Unit,
     onSelectPicture: (path: String) -> Unit,
     onSelectUri: (uri: Uri) -> Unit
 ) {
     val context = LocalContext.current
-    if (showSheet) {
-        PickerBottomSheet(
-            onDismiss = onClosePicker,
-            content = {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.padding(vertical = 32.dp)
-                ) {
-                    PhotoPicker(onSelect = { uri ->
-                        Timber.tag(TAG).e("PhotoPicker -> uri = ${uri}")
-                        val absolutePath = fileFromContentUri(context, uri).absolutePath
-                        Timber.tag(TAG).e("PhotoPicker -> getImages = ${absolutePath}")
-                        val getMediaFile = getMediaFile(context, uri)
-                        Timber.tag(TAG).e("PhotoPicker -> getFileName = ${getMediaFile}")
+    PickerBottomSheet(
+        onDismiss = onClosePicker,
+        content = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.padding(vertical = 32.dp)
+            ) {
+                PhotoPicker(onSelect = { uri ->
+                    Timber.e("PhotoPicker -> uri = ${uri}")
+                    val absolutePath = fileFromContentUri(context, uri).absolutePath
+                    Timber.e("PhotoPicker -> getImages = ${absolutePath}")
+                    val getMediaFile = getMediaFile(context, uri)
+                    Timber.e("PhotoPicker -> getFileName = ${getMediaFile}")
 
-                        onSelectUri(uri)
-                        onSelectPicture(uri.path ?: "")
-                        onClosePicker()
-                    })
-                    CameraPicker(onSelect = { uri ->
-                        uri.encodedPath?.let { onSelectPicture(it) }
-                        onSelectUri(uri)
-                        onClosePicker()
-                    })
-                }
-            })
-    }
+                    onSelectUri(uri)
+                    onSelectPicture(uri.path ?: "")
+                    onClosePicker()
+                })
+                CameraPicker(onSelect = { uri ->
+                    uri.encodedPath?.let { onSelectPicture(it) }
+                    onSelectUri(uri)
+                    onClosePicker()
+                })
+            }
+        }
+    )
 }
 
 @Composable
 fun InputContent(
     innerPadding: PaddingValues,
-    showSheet: MutableState<Boolean>,
-    state: State?,
-    onEditName: (name: String) -> Unit,
-    onDateChosen: (date: String) -> Unit,
-    navTo: () -> Unit,
+    state: InputStore.State,
+    onAction: (Intent) -> Unit,
+    // If we want to stick to MVI completely, we should keep showPhotoPicker handling in onAction callback too. (As well as showDialog var)
+    showPhotoPicker: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -214,46 +179,42 @@ fun InputContent(
             val label = "Name"
 
             OutlinedTextField(
-                value = state?.name ?: "",
-                onValueChange = { onEditName(it) },
+                value = state.name ?: "",
+                // BTW, saving to SharedPrefs with onValueChange is not the best idea in big projects
+                onValueChange = { onAction(Intent.EditName(name = it)) },
                 label = { Text(label) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
             //date
-            val showDialog = rememberSaveable { mutableStateOf(false) }
+            var showDialog by rememberSaveable { mutableStateOf(false) }
 
-            ClickableText(text = AnnotatedString(text = "date = ${state?.date?.formattedDate}"),
+            ClickableText(text = AnnotatedString(text = "date = ${state.date?.formattedDate}"),
                 style = TextStyle(
                     fontSize = 32.sp, fontWeight = FontWeight.W700
                 ),
-                onClick = {
-                    showDialog.value = true
-                })
+                onClick = { showDialog = true })
             Date(
-                onOk = { date -> onDateChosen(date.toString()) },
-                showDialog = showDialog
+                onDateSelected = { date -> onAction(Intent.EditDate(date = date.toString())) },
+                onDismiss = { showDialog = false },
             )
             //picture
             Button(
-                onClick = { showSheet.value = true },
+                onClick = { showPhotoPicker() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(buttonHeight),
             ) { Text(text = "Picture") }
 
-            state?.uri?.let {
-            }
-            Photo(state?.uri, painterResource(id = R.drawable.ic_smile_fox), Modifier)
-
+            Photo(state.uri, painterResource(id = R.drawable.ic_smile_fox), Modifier)
         }
         //next
-        if (state?.name?.isNotBlank() == true && state.date != "0") {
+        if (state.name?.isNotBlank() == true && state.date != "0") {
             Column(
                 modifier = Modifier.align(Alignment.BottomCenter)
             ) {
                 Button(
-                    onClick = navTo,
+                    onClick = { onAction(Intent.ShowAnniversaryScreen) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(buttonHeight)
@@ -261,10 +222,8 @@ fun InputContent(
                 ) { Text(text = "Show birthday screen") }
                 Spacer(modifier = Modifier.height(24.dp))
             }
-
         }
     }
-
 }
 
 @Composable
@@ -274,6 +233,7 @@ fun Toolbar(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
+            // You should try ktlint formatter
             TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 titleContentColor = MaterialTheme.colorScheme.primary,
@@ -288,33 +248,31 @@ fun Toolbar(
 
 @Composable
 private fun Date(
-    onOk: (date: Long?) -> Unit,
-    showDialog: MutableState<Boolean>
+    onDateSelected: (date: Long?) -> Unit,
+    onDismiss: () -> Unit
 ) {
     val datePickerState = rememberDatePickerState()
 
     datePickerState.selectedDateMillis?.let {
         Timber.tag("Date ->").e("datePickerState $it")
-        onOk(it)
+        onDateSelected(it)
     }
 
-    if (showDialog.value) {
-        DatePickerDialog(
-            onDismissRequest = { showDialog.value = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    showDialog.value = false
-                }) {
-                    Text("Ok")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDialog.value = false }) {
-                    Text("Cancel")
-                }
-            }
-        ) {
-            DatePicker(state = datePickerState)
+    DatePickerDialog(
+        onDismissRequest = { onDismiss() },
+        confirmButton = {
+            TextButton(
+                onClick = { onDismiss() },
+                content = { Text("Ok") }
+            )
+        },
+        dismissButton = {
+            TextButton(
+                onClick = { onDismiss() },
+                content = { Text("Cancel") }
+            )
         }
+    ) {
+        DatePicker(state = datePickerState)
     }
 }

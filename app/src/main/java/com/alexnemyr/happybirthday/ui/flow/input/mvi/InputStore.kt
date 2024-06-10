@@ -25,21 +25,13 @@ interface InputStore : Store<Intent, State, Label> {
     }
 
     data class State(
-        val name: String?,
-        val date: String?,
-        val uri: String?,
+        val name: String? = null,
+        val date: String? = null,
+        val uri: String? = null,
         val isProgress: Boolean = false,
-        val error: Error?
-    ) {
-        companion object {
-            val EMPTY_STATE = State(
-                name = null,
-                date = null,
-                uri = null,
-                error = null
-            )
-        }
-    }
+        val error: Error? = null,
+        val showSheet: Boolean = false
+    )
 
     sealed class Message {
         data object Progress : Message()

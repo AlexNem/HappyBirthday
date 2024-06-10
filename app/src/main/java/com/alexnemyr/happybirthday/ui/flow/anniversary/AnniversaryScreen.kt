@@ -88,8 +88,8 @@ fun AnniversaryScreen(
                     state = state,
                     onBackNav = { viewModel.accept(Intent.ShowInputScreen) }
                 )
+                // TODO hoist PicturePicker showing state
                 PicturePicker(
-                    showSheet = showSheet.value,
                     onClosePicker = { showSheet.value = false },
                     onSelectPicture = { path ->
                         viewModel.accept(Intent.EditPicture(uri = path))
