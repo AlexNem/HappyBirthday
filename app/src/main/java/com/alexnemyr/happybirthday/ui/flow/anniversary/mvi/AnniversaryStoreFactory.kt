@@ -16,7 +16,7 @@ class AnniversaryStoreFactory(
         return object : AnniversaryStore,
             Store<Intent, State, Label> by storeFactory.create(
                 name = this.javaClass.simpleName,
-                initialState = State.EMPTY_STATE,
+                initialState = State(),
                 bootstrapper = bootstrapper,
                 executorFactory = ::getFactory,
                 reducer = reducer

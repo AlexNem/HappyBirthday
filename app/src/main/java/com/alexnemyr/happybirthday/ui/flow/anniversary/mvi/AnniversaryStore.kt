@@ -15,7 +15,8 @@ interface AnniversaryStore :
     }
 
     sealed class Intent {
-        data object ShowInputScreen : Intent()
+        data object OnInputScreen : Intent()
+        data class OnPicturePicker(val show: Boolean) : Intent()
         data object FetchUser : Intent()
         data class EditPicture(val uri: String) : Intent()
     }
@@ -25,25 +26,18 @@ interface AnniversaryStore :
     }
 
     data class State(
-        val name: String?,
-        val date: String?,
-        val uri: String?,
+        val name: String? = null,
+        val date: String? = null,
+        val uri: String? = null,
         val isProgress: Boolean = false,
-        val error: Error?
-    ) {
-        companion object {
-            val EMPTY_STATE = State(
-                name = null,
-                date = null,
-                uri = null,
-                error = null
-            )
-        }
-    }
+        val showPicturePicker: Boolean = false,
+        val error: Error? = null
+    )
 
     sealed class Message {
         data object Progress : Message()
         data class UserData(val result: UserDomain) : Message()
+        data class ShowPicturePicker(val value: Boolean) : Message()
     }
 
 }

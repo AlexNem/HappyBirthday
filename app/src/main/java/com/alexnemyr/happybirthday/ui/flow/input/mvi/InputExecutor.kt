@@ -9,7 +9,6 @@ import com.alexnemyr.happybirthday.ui.flow.input.mvi.InputStore.State
 import com.alexnemyr.mvi.MviExecutor
 import com.alexnemyr.usecase.SaveUserUseCase
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class InputExecutor(
@@ -20,7 +19,16 @@ class InputExecutor(
 
     override fun executeAction(action: Action, getState: () -> State) {
         when (action) {
-            is Action.UpdateUser -> setUser(action.user)
+            is Action.UpdateUser -> dispatch(
+                Message.UserData(
+                    getState()
+                        .copy(
+                            name = action.user.name,
+                            date = action.user.date,
+                            uri = action.user.uri
+                        )
+                )
+            )
         }
     }
 
@@ -29,16 +37,9 @@ class InputExecutor(
             is Intent.EditName -> editName(name = intent.name, state = getState())
             is Intent.EditDate -> editDate(date = intent.date, state = getState())
             is Intent.EditPicture -> editUri(uri = intent.uri, state = getState())
-            is Intent.ShowAnniversaryScreen -> navToAnniversary(getState())
-        }
-    }
-
-    private fun setUser(user: UserDomain) {
-        job?.cancel()
-        job = scope.launch {
-            dispatch(Message.Progress)
-            delay(1000)
-            dispatch(Message.UserData(user))
+            is Intent.OnAnniversaryScreen -> navToAnniversary(getState())
+            is Intent.OnDatePicker -> dispatch(Message.ShowDatePicker(intent.show))
+            is Intent.OnPicturePicker -> dispatch(Message.ShowPicturePicker(intent.show))
         }
     }
 
@@ -47,7 +48,7 @@ class InputExecutor(
         job = scope.launch {
             val newState = state.copy(name = name)
             saveUserUseCase.invoke(user = newState.toDomain)
-            dispatch(Message.UserData(newState.toDomain))
+            dispatch(Message.UserData(newState))
         }
     }
 
@@ -56,15 +57,15 @@ class InputExecutor(
         job = scope.launch {
             val newState = state.copy(date = date)
             saveUserUseCase.invoke(user = newState.toDomain)
-            dispatch(Message.UserData(newState.toDomain))
+            dispatch(Message.UserData(newState))
         }
     }
 
     private fun editUri(uri: String, state: State) {
         job?.cancel()
         job = scope.launch {
-            val newState = state.copy(uri = uri).toDomain
-            saveUserUseCase.invoke(user = newState)
+            val newState = state.copy(uri = uri)
+            saveUserUseCase.invoke(user = newState.toDomain)
             dispatch(Message.UserData(newState))
         }
     }
