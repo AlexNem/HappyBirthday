@@ -22,7 +22,7 @@ fun BirthdayNavHost() {
     NavHost(navController = navController, startDestination = Screen.InputScreen.name) {
         composable(route = Screen.InputScreen.name) {
             InputScreen(
-                inputViewModel = inputViewModel,
+                viewModel = inputViewModel,
                 navController = navController
             )
         }

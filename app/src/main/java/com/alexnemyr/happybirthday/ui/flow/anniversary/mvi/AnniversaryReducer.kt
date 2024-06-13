@@ -15,6 +15,7 @@ class AnniversaryReducer : Reducer<State, Message> {
                     uri = msg.result.uri,
                     isProgress = false
                 )
+            is Message.ShowPicturePicker -> copy(showPicturePicker = msg.value)
         }
     }
 

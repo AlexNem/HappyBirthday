@@ -22,23 +22,18 @@ class AnniversaryExecutor(
 
     private var job: Job? = null
 
-    override fun executeAction(
-        action: Action,
-        getState: () -> State
-    ) {
+    override fun executeAction(action: Action, getState: () -> State) {
         when (action) {
             is Action.UpdateUser -> setUser(action.user)
         }
     }
 
-    override fun executeIntent(
-        intent: Intent,
-        getState: () -> State
-    ) {
+    override fun executeIntent(intent: Intent, getState: () -> State) {
         when (intent) {
             is Intent.FetchUser -> fetchUser()
             is Intent.EditPicture -> editPicture(intent.uri, getState())
-            is Intent.ShowInputScreen -> navToInput()
+            is Intent.OnInputScreen -> navToInput()
+            is Intent.OnPicturePicker -> dispatch(Message.ShowPicturePicker(intent.show))
         }
     }
 
@@ -55,7 +50,7 @@ class AnniversaryExecutor(
         job?.cancel()
         job = scope.launch {
             dispatch(Message.Progress)
-            delay(1000)
+            delay(1000) //for test
             dispatch(Message.UserData(user))
         }
     }

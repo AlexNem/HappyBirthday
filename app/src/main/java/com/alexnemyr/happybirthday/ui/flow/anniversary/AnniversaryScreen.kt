@@ -21,8 +21,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -36,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.alexnemyr.domain.util.Age
 import com.alexnemyr.domain.util.TAG
@@ -45,12 +45,13 @@ import com.alexnemyr.domain.util.yearOrMonthTitle
 import com.alexnemyr.happybirthday.R
 import com.alexnemyr.happybirthday.navigation.Screen
 import com.alexnemyr.happybirthday.ui.common.Photo
+import com.alexnemyr.happybirthday.ui.common.PicturePicker
 import com.alexnemyr.happybirthday.ui.common.util.NumberIcon
 import com.alexnemyr.happybirthday.ui.common.util.getAnniversaryResources
 import com.alexnemyr.happybirthday.ui.flow.anniversary.mvi.AnniversaryStore.Intent
 import com.alexnemyr.happybirthday.ui.flow.anniversary.mvi.AnniversaryStore.Label
 import com.alexnemyr.happybirthday.ui.flow.anniversary.mvi.AnniversaryStore.State
-import com.alexnemyr.happybirthday.ui.flow.input.PicturePicker
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
 
@@ -60,70 +61,39 @@ fun AnniversaryScreen(
     viewModel: AnniversaryViewModel,
     navController: NavHostController,
 ) {
+    val state by viewModel.states.collectAsStateWithLifecycle()
 
-    val mviState = viewModel.states.collectAsState(null).value
-    val showSheet = remember { mutableStateOf(false) }
-    val viewState: MutableState<State?> = remember { mutableStateOf(null) }
-
-
-    LaunchedEffect(key1 = mviState) {
+    LaunchedEffect(key1 = viewModel.labels) {
         viewModel.accept(Intent.FetchUser)
+        viewModel.labels.onEach {
+            Timber.tag(TAG).d("label -> onEach $it")
+            when (it) {
+                is Label.NavigateToInput -> {
+                    navController.navigate(Screen.InputScreen.name)
+                }
+            }
+        }.collect()
     }
 
-    viewModel.labels.onEach {
-        Timber.tag(TAG).d("label -> onEach $it")
-        when (it) {
-            is Label.NavigateToInput -> {
-                navController.navigate(Screen.InputScreen.name)
-            }
-        }
-    }.collectAsState(initial = null)
-
-    when (mviState) {
-        is State -> {
-            viewState.value = mviState
-            viewState.value?.let { state ->
-                AnniversaryContent(
-                    showSheet = showSheet,
-                    state = state,
-                    onBackNav = { viewModel.accept(Intent.ShowInputScreen) }
-                )
-                // TODO hoist PicturePicker showing state
-                PicturePicker(
-                    onClosePicker = { showSheet.value = false },
-                    onSelectPicture = { path ->
-                        viewModel.accept(Intent.EditPicture(uri = path))
-                    },
-                    onSelectUri = {  }
-                )
-            }
-
-        }
-
-//        is AnniversaryStore.State.Progress -> {
-//            Box(modifier = Modifier.fillMaxSize()) {
-//                CircularProgressIndicator(Modifier.align(Alignment.Center))
-//            }
-//        }
-//
-//        is AnniversaryStore.State.Error -> {
-//            Toast.makeText(LocalContext.current, "Error", Toast.LENGTH_LONG).show()
-//        }
-
-        else -> {
-            Timber.tag(TAG).d("mviState is else $mviState")
-        }
-    }
-
+    AnniversaryContent(
+        onShowPicturePicker = { show -> viewModel.accept(Intent.OnPicturePicker(show)) },
+        state = state,
+        onBackNav = { viewModel.accept(Intent.OnInputScreen) }
+    )
+    if (state.showPicturePicker)
+        PicturePicker(
+            onClosePicker = { Intent.OnPicturePicker(show = false) },
+            onSelectPicture = { path -> viewModel.accept(Intent.EditPicture(uri = path)) },
+            onSelectUri = { }
+        )
 }
 
 @Composable
 fun AnniversaryContent(
-    showSheet: MutableState<Boolean>,
+    onShowPicturePicker: (value: Boolean) -> Unit,
     state: State,
     onBackNav: () -> Unit
 ) {
-
     val bg = remember { mutableStateOf(getAnniversaryResources()) }.value
 
     Box(
@@ -166,7 +136,7 @@ fun AnniversaryContent(
 
                 val padding = 20.dp
                 IconButton(
-                    onClick = { showSheet.value = true },
+                    onClick = { onShowPicturePicker(true) },
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .size((54 + padding.value).dp)
