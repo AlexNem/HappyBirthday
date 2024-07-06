@@ -1,7 +1,7 @@
 [versions]
 accompanistPermissions = "0.35.0-alpha"
 activityKtx = "1.9.0"
-agp = "8.4.1"
+agp = "8.5.0"
 coil = "2.5.0"
 koinAnnotationVersion = "1.3.1"
 koinVersion = "3.5.3"
@@ -21,7 +21,7 @@ mvikotlinTimetravel = "3.3.0"
 navigationCompose = "2.7.7"
 timberVersion = "5.0.1"
 jetbrainsKotlinJvm = "1.9.0"
-appcompat = "1.6.1"
+appcompat = "1.7.0"
 material = "1.12.0"
 
 [libraries]

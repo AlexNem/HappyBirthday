@@ -20,21 +20,22 @@ import timber.log.Timber
 fun PicturePicker(
     onSelectPicture: (path: String) -> Unit,
     onSelectUri: (uri: Uri) -> Unit,
-    onClosePicker: () -> Unit,
+    onClosePicker: () -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+
     //TODO: need to refactor
     val processUri: (uri: Uri) -> Unit = { uri ->
         scope.launch {
             delay(2000) // why delay?
-
             // All Media.kt file functions should be distributed among viewmodels/repos/datasources OR some other factory classes.
             // rememberCoroutineScope together with getMediaFile() will be canceled if current composable leaves composition.
             val getMediaFile = getMediaFile(context, uri)
             Timber.e("CameraPicker -> getFileName = $getMediaFile")
         }
     }
+
     PickerBottomSheet(
         onDismiss = { onClosePicker() },
         content = {
@@ -55,16 +56,6 @@ fun PicturePicker(
                     onClosePicker()
                 })
                 CameraPicker(onSelect = { uri ->
-//                    uri.encodedPath?.let {
-//                        scope.launch {
-//                            delay(2000) // why delay?
-//
-//                            // All Media.kt file functions should be distributed among viewmodels/repos/datasources OR some other factory classes.
-//                            // rememberCoroutineScope together with getMediaFile() will be canceled if current composable leaves composition.
-//                            val getMediaFile = getMediaFile(context, uri)
-//                            Timber.e("CameraPicker -> getFileName = $getMediaFile")
-//                        }
-//                    }
                     onSelectUri(uri)
                     onClosePicker()
                 })
