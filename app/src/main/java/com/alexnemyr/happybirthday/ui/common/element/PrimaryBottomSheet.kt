@@ -1,4 +1,4 @@
-package com.alexnemyr.happybirthday.ui.common
+package com.alexnemyr.happybirthday.ui.common.element
 
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.material3.BottomSheetDefaults
@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PickerBottomSheet(
+fun PrimaryBottomSheet(
     onDismiss: () -> Unit,
     content: @Composable ColumnScope.() -> Unit,
     ) {

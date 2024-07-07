@@ -11,7 +11,4 @@ class AnniversaryViewModel(
     storeFactory: AnniversaryStoreFactory
 ) : MviViewModel<Intent, State, Label, AnniversaryStore>(
     storeFactory.create()
-) {
-
-
-}
+)

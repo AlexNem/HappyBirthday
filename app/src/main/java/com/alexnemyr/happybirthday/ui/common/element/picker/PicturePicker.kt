@@ -1,4 +1,4 @@
-package com.alexnemyr.happybirthday.ui.common
+package com.alexnemyr.happybirthday.ui.common.element.picker
 
 import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.alexnemyr.happybirthday.ui.common.element.PrimaryBottomSheet
 import com.alexnemyr.happybirthday.ui.common.util.fileFromContentUri
 import com.alexnemyr.happybirthday.ui.common.util.getMediaFile
 import kotlinx.coroutines.delay
@@ -36,7 +37,7 @@ fun PicturePicker(
         }
     }
 
-    PickerBottomSheet(
+    PrimaryBottomSheet(
         onDismiss = { onClosePicker() },
         content = {
             Column(

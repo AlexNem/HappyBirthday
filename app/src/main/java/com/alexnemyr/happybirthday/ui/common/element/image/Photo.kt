@@ -1,4 +1,4 @@
-package com.alexnemyr.happybirthday.ui.common
+package com.alexnemyr.happybirthday.ui.common.element.image
 
 import android.net.Uri
 import androidx.compose.foundation.Image
@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.alexnemyr.domain.util.TAG
+import com.alexnemyr.happybirthday.ui.common.photoSize
 import com.alexnemyr.happybirthday.ui.common.util.fileFromContentUri
 import com.alexnemyr.happybirthday.ui.common.util.getUri
 import kotlinx.coroutines.launch
@@ -57,11 +58,13 @@ fun Photo(
                 val request =
                     ImageRequest.Builder(context).data(Uri.parse(absolutePath)).allowHardware(false)
                         .build()
+
+                val clipPercent = 100
                 AsyncImage(
                     model = request,
                     contentDescription = null,
                     modifier = Modifier
-                        .clip(RoundedCornerShape(100))
+                        .clip(RoundedCornerShape(clipPercent))
                         .size(292.dp),
                     contentScale = ContentScale.Crop
                 )

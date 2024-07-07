@@ -1,24 +1,21 @@
 package com.alexnemyr.happybirthday.ui.flow.anniversary
 
-import android.content.Context
-import android.content.Intent
-import android.graphics.Bitmap
-import android.net.Uri
-import android.provider.MediaStore
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.alexnemyr.happybirthday.ui.flow.screenshotWrapper
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.alexnemyr.happybirthday.R
+import com.alexnemyr.happybirthday.ui.common.element.button.PrimaryButton
+import com.alexnemyr.happybirthday.ui.common.util.getAnniversaryResources
+import com.alexnemyr.happybirthday.ui.common.util.screenshotWrapper
+import com.alexnemyr.happybirthday.ui.common.util.share
 
 @Composable
 fun AnniversaryBitmapWrapperScreen(
@@ -26,40 +23,33 @@ fun AnniversaryBitmapWrapperScreen(
     navController: NavHostController
 ) {
     val context = LocalContext.current
-    Box(modifier = Modifier) {
+    val res by remember { mutableStateOf(getAnniversaryResources()) }
+
+    Box {
         val bitmapWrapper = screenshotWrapper(
             content = {
                 AnniversaryScreen(
                     viewModel = viewModel,
-                    navController = navController
+                    navController = navController,
+                    res = res
                 )
             }
         )
-        Button(
+
+        PrimaryButton(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 24.dp),
+            nameId = R.string.btn_share_the_new,
+            colorId = res.btnColor,
+            horizontalPadding = 16.dp,
             onClick = {
-                val bitmap = bitmapWrapper.invoke()
-                share(bitmap, context)
+                share(bitmapWrapper.invoke(), context)
             }
-        ) {
-            Text(text = "Share the news")
-        }
+        )
+
     }
 
 }
 
-private fun share(bitmap: Bitmap, context: Context) {
-    val timeStamp = SimpleDateFormat("yyyy-MM-dd_HHmmss", Locale.getDefault()).format(Date())
-    val bitmapPath: String =
-        MediaStore.Images.Media.insertImage(context.contentResolver, bitmap, timeStamp, null)
-    val bitmapUri = Uri.parse(bitmapPath)
 
-    val intent = Intent(Intent.ACTION_SEND)
-    intent.setType("image/png")
-    intent.putExtra(Intent.EXTRA_STREAM, bitmapUri)
-    val chooser = Intent.createChooser(intent, "Share")
-
-    context.startActivity(chooser)
-}

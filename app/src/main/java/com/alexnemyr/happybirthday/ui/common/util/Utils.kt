@@ -4,7 +4,7 @@ import com.alexnemyr.happybirthday.R
 
 
 enum class BGType {
-    FOX, PELICAN//, ELEPHANT //todo: crash with elephant vector drawable
+    FOX, PELICAN
 }
 
 val BGType.resources: AnniversaryResources
