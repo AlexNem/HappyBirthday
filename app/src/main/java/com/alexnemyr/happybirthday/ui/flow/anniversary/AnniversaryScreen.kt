@@ -57,7 +57,6 @@ fun AnniversaryScreen(
     val state by viewModel.states.collectAsStateWithLifecycle()
 
     LaunchedEffect(key1 = viewModel.labels) {
-        viewModel.accept(Intent.FetchUser)
         viewModel.labels.onEach {
             when (it) {
                 is Label.NavigateToInput -> {
@@ -75,9 +74,9 @@ fun AnniversaryScreen(
     )
     if (state.showPicturePicker)
         PicturePicker(
-            onClosePicker = { Intent.OnPicturePicker(show = false) },
+            onClosePicker = { viewModel.accept(Intent.OnPicturePicker(show = false)) },
             onSelectPicture = { path -> viewModel.accept(Intent.EditPicture(uri = path)) },
-            onSelectUri = { }
+            onSelectUri = { /*todo*/ }
         )
 }
 
@@ -93,7 +92,6 @@ fun AnniversaryContent(
             .background(colorResource(id = res.backgroundColor))
             .fillMaxSize()
     ) {
-
         IconButton(
             modifier = Modifier
                 .padding(16.dp)

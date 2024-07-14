@@ -1,6 +1,5 @@
 package com.alexnemyr.happybirthday.ui.common.element.button
 
-import androidx.annotation.ColorRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -10,6 +9,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -34,7 +34,7 @@ private fun PrimaryButtonPreview() {
 fun PrimaryButton(
     modifier: Modifier = Modifier,
     @StringRes nameId: Int,
-    @ColorRes colorId: Int = R.color.btn_pelican,
+    color: Color = colorResource(id =  R.color.btn_pelican),
     fontWeight: FontWeight = FontWeight.Bold,
     fontSize: TextUnit = 18.sp,
     horizontalPadding: Dp = 16.dp,
@@ -42,7 +42,7 @@ fun PrimaryButton(
 ) {
     Button(
         onClick = onClick,
-        colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = colorId)),
+        colors = ButtonDefaults.buttonColors(containerColor = color),
         modifier = modifier
             .fillMaxWidth()
             .height(buttonHeight)

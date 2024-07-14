@@ -9,6 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.alexnemyr.happybirthday.R
@@ -41,7 +42,7 @@ fun AnniversaryBitmapWrapperScreen(
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 24.dp),
             nameId = R.string.btn_share_the_new,
-            colorId = res.btnColor,
+            color = colorResource(id = res.btnColor),
             horizontalPadding = 16.dp,
             onClick = {
                 share(bitmapWrapper.invoke(), context)
