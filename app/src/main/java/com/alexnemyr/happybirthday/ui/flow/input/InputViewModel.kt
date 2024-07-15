@@ -9,7 +9,4 @@ import com.alexnemyr.mvi.MviViewModel
 
 class InputViewModel(
     storeFactory: InputStoreFactory
-) : MviViewModel<Intent, State, Label, InputStore>(storeFactory.create()) {
-
-
-}
+) : MviViewModel<Intent, State, Label, InputStore>(storeFactory.create())

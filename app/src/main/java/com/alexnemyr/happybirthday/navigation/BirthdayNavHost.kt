@@ -6,8 +6,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.alexnemyr.happybirthday.ui.flow.anniversary.AnniversaryBitmapWrapperScreen
 import com.alexnemyr.happybirthday.ui.flow.anniversary.AnniversaryViewModel
-import com.alexnemyr.happybirthday.ui.flow.input.InputViewModel
 import com.alexnemyr.happybirthday.ui.flow.input.InputScreen
+import com.alexnemyr.happybirthday.ui.flow.input.InputViewModel
 import org.koin.androidx.compose.koinViewModel
 
 

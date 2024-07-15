@@ -14,7 +14,9 @@ interface InputStore : Store<Intent, State, Label> {
     }
 
     sealed class Intent {
-        data object ShowAnniversaryScreen : Intent()
+        data object OnAnniversaryScreen : Intent()
+        data class OnDatePicker(val show: Boolean) : Intent()
+        data class OnPicturePicker(val show: Boolean) : Intent()
         data class EditName(val name: String) : Intent()
         data class EditDate(val date: String) : Intent()
         data class EditPicture(val uri: String) : Intent()
@@ -25,25 +27,20 @@ interface InputStore : Store<Intent, State, Label> {
     }
 
     data class State(
-        val name: String?,
-        val date: String?,
-        val uri: String?,
+        val name: String? = null,
+        val date: String? = null,
+        val uri: String? = null,
         val isProgress: Boolean = false,
-        val error: Error?
-    ) {
-        companion object {
-            val EMPTY_STATE = State(
-                name = null,
-                date = null,
-                uri = null,
-                error = null
-            )
-        }
-    }
+        val error: Error? = null,
+        val showDatePicker: Boolean = false,
+        val showPicturePicker: Boolean = false
+    )
 
     sealed class Message {
         data object Progress : Message()
         data class Error(val e: Throwable) : Message()
-        data class UserData(val result: UserDomain) : Message()
+        data class UserData(val result: State) : Message()
+        data class ShowPicturePicker(val value: Boolean) : Message()
+        data class ShowDatePicker(val value: Boolean) : Message()
     }
 }

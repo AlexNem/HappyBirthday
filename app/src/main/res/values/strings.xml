@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">HappyBirthday</string>
+    <string name="input_name_label">Name</string>
+    <string name="btn_show_birthday_screen">Show Birthday Screen</string>
+    <string name="btn_chose_picture">Chose Picture</string>
+    <string name="btn_chose_date">Chose Date</string>
+    <string name="btn_share_the_new">Share The New</string>
+    <string name="btn_select_a_photo">Select a photo</string>
+    <string name="btn_capture_image_from_camera">Capture Image From Camera</string>
 </resources>
