@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -21,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.alexnemyr.happybirthday.R
 import com.alexnemyr.happybirthday.ui.common.buttonHeight
+import com.alexnemyr.happybirthday.ui.theme.AppTheme
 
 @Preview
 @Composable
@@ -34,7 +36,7 @@ private fun PrimaryButtonPreview() {
 fun PrimaryButton(
     modifier: Modifier = Modifier,
     @StringRes nameId: Int,
-    color: Color = colorResource(id =  R.color.btn_pelican),
+    color: Color = MaterialTheme.colorScheme.primary, //colorResource(id =  R.color.btn_pelican),
     fontWeight: FontWeight = FontWeight.Bold,
     fontSize: TextUnit = 18.sp,
     horizontalPadding: Dp = 16.dp,

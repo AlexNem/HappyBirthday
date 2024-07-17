@@ -1,16 +1,16 @@
 package com.alexnemyr.happybirthday.ui.common.element.button
 
-import androidx.annotation.ColorRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -34,7 +34,7 @@ private fun SecondaryButtonPreview() {
 fun SecondaryButton(
     modifier: Modifier = Modifier,
     @StringRes nameId: Int,
-    @ColorRes colorId: Int = R.color.btn_pelican,
+    color: Color = MaterialTheme.colorScheme.primary,
     fontSize: TextUnit = 18.sp,
     fontWeight: FontWeight = FontWeight.Bold,
     horizontalPadding: Dp = 0.dp,
@@ -46,7 +46,7 @@ fun SecondaryButton(
             .wrapContentWidth()
             .height(secondaryButtonHeight)
             .padding(horizontal = horizontalPadding),
-        colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = colorId))
+        colors = ButtonDefaults.buttonColors(containerColor = color)
     ) {
         Text(
             text = stringResource(id = nameId).uppercase(),
